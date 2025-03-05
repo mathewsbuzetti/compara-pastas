@@ -76,7 +76,7 @@
 
 1. Baixe o script: 
   
-[![Download Script](https://img.shields.io/badge/Download%20Script%20Start%2FStop-blue?style=flat-square&logo=powershell)](https://github.com/mathewsbuzetti/script/powershell-folder-comparison-tool/blob/main/Compare-FolderStructures.ps1)
+[![Download Script](https://img.shields.io/badge/Download%20Script%20Start%2FStop-blue?style=flat-square&logo=powershell)](https://github.com/mathewsbuzetti/powershell-folder-comparison-tool/blob/main/Script/Compare-FolderStructures.ps1)
    
 3. Abra o script em um editor de texto como Notepad++ ou VSCode
 4. Localize a seção de configuração no final do script:
