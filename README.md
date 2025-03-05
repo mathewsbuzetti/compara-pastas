@@ -92,8 +92,8 @@ $outputDir = "C:\temp\COMPARAÇÕES"  # Pasta onde serão salvos os relatórios
 $folderPairs = @(
     # Par 1: Mkt Edição vs Mkt Edição
     @{
-        Folder1 = "C:\Users\mathews.abreu\OneDrive - ISH TECNOLOGIA S A"
-        Folder2 = "C:\Users\mathews.abreu\Desktop\Dados2"
+        Folder1 = "\\servidor\compartilhamento\Documentos"  # Pasta na rede (origem)
+        Folder2 = "D:\Backup\Documentos"                    # Pasta local (destino)
     }
 )
 
