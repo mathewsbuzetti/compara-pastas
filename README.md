@@ -20,10 +20,7 @@
 
 ## 📷 Screenshots
 
-*Adicione screenshots do relatório HTML aqui*
 
-![Relatório HTML de Comparação](https://placeholder.com/screenshot1.png)
-![Gráficos e Estatísticas](https://placeholder.com/screenshot2.png)
 
 ## 📋 Índice
 
