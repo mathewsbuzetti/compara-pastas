@@ -81,7 +81,8 @@
 ### 1. Configuração Básica
 
 1. Baixe o script: 
-   [![Download Script](https://img.shields.io/badge/Download-Comparador_Arquivos_Rede_v2.ps1-blue?style=for-the-badge&logo=powershell)](https://raw.githubusercontent.com/seu-usuario/powershell-folder-comparison-tool/main/Compare-FolderStructures.ps1)
+  
+[![Download Script](https://img.shields.io/badge/Download%20Script%20Start%2FStop-blue?style=flat-square&logo=powershell)](https://github.com/mathewsbuzetti/script/powershell-folder-comparison-tool/blob/main/Compare-FolderStructures.ps1)
    
 3. Abra o script em um editor de texto como Notepad++ ou VSCode
 4. Localize a seção de configuração no final do script:
