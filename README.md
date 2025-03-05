@@ -36,7 +36,7 @@
 7. [Parâmetros do Script](#-parâmetros-do-script)
 8. [Tratamento de Erros e Feedback](#-tratamento-de-erros-e-feedback)
 9. [Relatório HTML](#-relatório-html)
-10. [Licença](#-licença)
+10. [Versionamento](#-Versionamento)
 
 ## 💻 Funcionalidades
 
