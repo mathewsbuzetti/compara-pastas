@@ -13,7 +13,7 @@
 |----------|-----------|
 | **Título** | Comparador de Pastas - Versão Aprimorada |
 | **Assunto** | Comparação de arquivos entre pastas/diretórios |
-| **Versão** | 2.0.0 |
+| **Versão** | 1.0.0 |
 | **Data** | 05/03/2025 |
 | **Autor** | Mathews Buzetti |
 | **Tags** | `powershell`, `file-comparison`, `directory-sync`, `reporting` |
