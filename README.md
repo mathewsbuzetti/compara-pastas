@@ -18,7 +18,13 @@
 | **Autor** | Mathews Buzetti |
 | **Tags** | `powershell`, `file-comparison`, `directory-sync`, `reporting` |
 
-## 📷 Screenshots
+## 📊 Visualização do Relatório Interativo
+
+<p align="center">
+  <a href="https://exemplo-relatorio-comparador.netlify.app" target="_blank">
+    <img src="https://img.shields.io/badge/Visualizar%20Demo-Relatório%20HTML%20Interativo-brightgreen?style=for-the-badge&logo=html5" alt="Visualizar Demo" width="350">
+  </a>
+</p>
 
 ![image](https://github.com/user-attachments/assets/aaff75a0-b60d-4525-88ed-1e21955b0ca8)
 
