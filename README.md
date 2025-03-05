@@ -21,7 +21,7 @@
 ## 📊 Visualização do Relatório Interativo
 
 <p align="center">
-  <a href="https://exemplo-relatorio-comparador.netlify.app" target="_blank">
+  <a href="[https://exemplo-relatorio-comparador.netlify.app](https://mathewsbuzetti.github.io/powershell-folder-comparison-tool/)" target="_blank">
     <img src="https://img.shields.io/badge/Visualizar%20Demo-Relatório%20HTML%20Interativo-brightgreen?style=for-the-badge&logo=html5" alt="Visualizar Demo" width="350">
   </a>
 </p>
