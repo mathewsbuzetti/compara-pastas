@@ -18,12 +18,18 @@
 | **Autor** | Mathews Buzetti |
 | **Tags** | `powershell`, `file-comparison`, `directory-sync`, `reporting` |
 
-## 📊 Visualização do Relatório Interativo
+📊 Visualização do Relatório Interativo
+
+A ferramenta gera um relatório HTML interativo que facilita a visualização e gerenciamento das diferenças entre as pastas comparadas. O relatório inclui gráficos, estatísticas e uma tabela de arquivos com recursos de filtragem e marcação de progresso.
 
 <p align="center">
-  <a href="[https://exemplo-relatorio-comparador.netlify.app](https://mathewsbuzetti.github.io/powershell-folder-comparison-tool/)" target="_blank">
-    <img src="https://img.shields.io/badge/Visualizar%20Demo-Relatório%20HTML%20Interativo-brightgreen?style=for-the-badge&logo=html5" alt="Visualizar Demo" width="350">
+  <strong>👇 Clique no botão abaixo para visualizar um exemplo de relatório de comparação entre "Projetos vs Backup" 👇</strong>
+  <br><br>
+  <a href="https://mathewsbuzetti.github.io/powershell-folder-comparison-tool/" target="_blank">
+    <img src="https://img.shields.io/badge/Acessar%20Demo-Relatório:%20Projetos%20vs%20Backup-brightgreen?style=for-the-badge&logo=html5" alt="Acessar Demo" width="400">
   </a>
+  <br>
+  <em>O demo mostra todas as funcionalidades do relatório, incluindo gráficos, estatísticas e tabela interativa</em>
 </p>
 
 ![image](https://github.com/user-attachments/assets/aaff75a0-b60d-4525-88ed-1e21955b0ca8)
