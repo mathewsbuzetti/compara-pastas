@@ -80,9 +80,11 @@
 
 ### 1. Configuração Básica
 
-1. Baixe o script `Comparador_Arquivos_Rede_v2.ps1`
-2. Abra o script em um editor de texto como Notepad++ ou VSCode
-3. Localize a seção de configuração no final do script:
+1. Baixe o script: 
+   [![Download Script](https://img.shields.io/badge/Download-Comparador_Arquivos_Rede_v2.ps1-blue?style=for-the-badge&logo=powershell)](https://raw.githubusercontent.com/seu-usuario/powershell-folder-comparison-tool/main/Compare-FolderStructures.ps1)
+   
+3. Abra o script em um editor de texto como Notepad++ ou VSCode
+4. Localize a seção de configuração no final do script:
 
 ```powershell
 # Configurações de exemplo (podem ser alteradas conforme necessário)
@@ -90,10 +92,10 @@ $outputDir = "C:\temp\COMPARAÇÕES"  # Pasta onde serão salvos os relatórios
 
 # Definir os pares de pastas para comparação
 $folderPairs = @(
-    # Par 1: Mkt Edição vs Mkt Edição
+    # Par 1: Documentos Rede vs Documentos Local
     @{
-        Folder1 = "\\servidor\compartilhamento\Documentos"  # Pasta na rede (origem)
-        Folder2 = "D:\Backup\Documentos"                    # Pasta local (destino)
+        Folder1 = "\\servidor\compartilhamento\Documentos"
+        Folder2 = "D:\Backup\Documentos"
     }
 )
 
