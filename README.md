@@ -221,3 +221,8 @@ O relatório HTML gerado inclui:
    - Filtros e ordenação por qualquer coluna
    - Paginação para melhor navegação
    - Botões para copiar caminhos
+
+## 🔄 Versionamento
+
+- Versão: 1.0.0
+- Última atualização: 05/03/2025
