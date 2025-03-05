@@ -7,12 +7,6 @@
 
 **Aplica-se a:** ✔️ Windows 10/11 ✔️ Windows Server 2016/2019/2022
 
-<p align="center">
-  <a href="https://exemplo-relatorio-comparador.netlify.app" target="_blank">
-    <img src="https://img.shields.io/badge/Ver%20Demo-Relatório%20HTML-brightgreen?style=for-the-badge&logo=html5" alt="Ver Demo" width="250">
-  </a>
-</p>
-
 ## 📋 Metadados
 
 | Metadado | Descrição |
