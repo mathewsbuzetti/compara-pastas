@@ -445,7 +445,7 @@
             background: linear-gradient(to right, #10b981, #34d399);
             border-radius: 15px;
             transition: width 0.5s ease;
-            width: 25%;
+            width: 0%;
             box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
         }
         
@@ -706,23 +706,23 @@
                     
                     <!-- Barra de Progresso -->
                     <div class="progress-container">
-                        <div class="progress-percentage-display" id="progressPercentage">25%</div>
+                        <div class="progress-percentage-display" id="progressPercentage">0%</div>
                         
                         <div class="progress-bar-container">
-                            <div class="progress-bar pulse" id="progressBar"></div>
+                            <div class="progress-bar" id="progressBar" style="width: 0%"></div>
                         </div>
                         
                         <div class="progress-details">
                             <div class="progress-stat pending">
                                 <div class="progress-stat-icon">⚠️</div>
                                 <div class="progress-stat-title">Pendentes</div>
-                                <div class="progress-stat-value" id="pendingFiles">32</div>
+                                <div class="progress-stat-value" id="pendingFiles">42</div>
                             </div>
                             
                             <div class="progress-stat complete">
                                 <div class="progress-stat-icon">✅</div>
                                 <div class="progress-stat-title">Concluídos</div>
-                                <div class="progress-stat-value" id="completedFiles">10</div>
+                                <div class="progress-stat-value" id="completedFiles">0</div>
                             </div>
                         </div>
                     </div>
@@ -748,146 +748,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr class="row-odd file-done" id="row-1">
-                                <td class="p-3 border-b border-gray-600 text-center">
-                                    <input type="checkbox" id="check-1" class="file-check w-5 h-5 cursor-pointer" 
-                                        onchange="toggleRowDone(this, 'row-1')" checked />
-                                </td>
-                                <td class="p-3 border-b border-gray-600">1</td>
-                                <td class="p-3 border-b border-gray-600 font-medium">
-                                    Relatório_2023.docx
-                                    <button class="copy-cell-btn" onclick="copyToClipboard('fullPath1')" title="Copiar caminho completo">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                                        </svg>
-                                    </button>
-                                    <span id="fullPath1" style="display:none">C:\Users\mathews.abreu\Documentos\Relatórios\Relatório_2023.docx</span>
-                                </td>
-                                <td class="p-3 border-b border-gray-600">
-                                    C:\Users\mathews.abreu\Documentos\Relatórios\Relatório_2023.docx
-                                    <button class="copy-cell-btn" onclick="copyToClipboard('fullPath21')" title="Copiar caminho completo">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                                        </svg>
-                                    </button>
-                                    <span id="fullPath21" style="display:none">C:\Users\mathews.abreu\Documentos\Relatórios\Relatório_2023.docx</span>
-                                </td>
-                                <td class="p-3 border-b border-gray-600 text-right">3.45 MB</td>
-                            </tr>
-                            <tr class="row-even file-done" id="row-2">
-                                <td class="p-3 border-b border-gray-600 text-center">
-                                    <input type="checkbox" id="check-2" class="file-check w-5 h-5 cursor-pointer" 
-                                        onchange="toggleRowDone(this, 'row-2')" checked />
-                                </td>
-                                <td class="p-3 border-b border-gray-600">2</td>
-                                <td class="p-3 border-b border-gray-600 font-medium">
-                                    Apresentação_Q1.pptx
-                                    <button class="copy-cell-btn" onclick="copyToClipboard('fullPath2')" title="Copiar caminho completo">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                                        </svg>
-                                    </button>
-                                    <span id="fullPath2" style="display:none">C:\Users\mathews.abreu\Documentos\Apresentações\Apresentação_Q1.pptx</span>
-                                </td>
-                                <td class="p-3 border-b border-gray-600">
-                                    C:\Users\mathews.abreu\Documentos\Apresentações\Apresentação_Q1.pptx
-                                    <button class="copy-cell-btn" onclick="copyToClipboard('fullPath22')" title="Copiar caminho completo">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                                        </svg>
-                                    </button>
-                                    <span id="fullPath22" style="display:none">C:\Users\mathews.abreu\Documentos\Apresentações\Apresentação_Q1.pptx</span>
-                                </td>
-                                <td class="p-3 border-b border-gray-600 text-right">8.72 MB</td>
-                            </tr>
-                            <tr class="row-odd" id="row-3">
-                                <td class="p-3 border-b border-gray-600 text-center">
-                                    <input type="checkbox" id="check-3" class="file-check w-5 h-5 cursor-pointer" 
-                                        onchange="toggleRowDone(this, 'row-3')" />
-                                </td>
-                                <td class="p-3 border-b border-gray-600">3</td>
-                                <td class="p-3 border-b border-gray-600 font-medium">
-                                    Planilha_Financeira.xlsx
-                                    <button class="copy-cell-btn" onclick="copyToClipboard('fullPath3')" title="Copiar caminho completo">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                                        </svg>
-                                    </button>
-                                    <span id="fullPath3" style="display:none">C:\Users\mathews.abreu\Documentos\Financeiro\Planilha_Financeira.xlsx</span>
-                                </td>
-                                <td class="p-3 border-b border-gray-600">
-                                    C:\Users\mathews.abreu\Documentos\Financeiro\Planilha_Financeira.xlsx
-                                    <button class="copy-cell-btn" onclick="copyToClipboard('fullPath23')" title="Copiar caminho completo">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                                        </svg>
-                                    </button>
-                                    <span id="fullPath23" style="display:none">C:\Users\mathews.abreu\Documentos\Financeiro\Planilha_Financeira.xlsx</span>
-                                </td>
-                                <td class="p-3 border-b border-gray-600 text-right">2.18 MB</td>
-                            </tr>
-                            <tr class="row-even" id="row-4">
-                                <td class="p-3 border-b border-gray-600 text-center">
-                                    <input type="checkbox" id="check-4" class="file-check w-5 h-5 cursor-pointer" 
-                                        onchange="toggleRowDone(this, 'row-4')" />
-                                </td>
-                                <td class="p-3 border-b border-gray-600">4</td>
-                                <td class="p-3 border-b border-gray-600 font-medium">
-                                    Contrato_Cliente.pdf
-                                    <button class="copy-cell-btn" onclick="copyToClipboard('fullPath4')" title="Copiar caminho completo">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                                        </svg>
-                                    </button>
-                                    <span id="fullPath4" style="display:none">C:\Users\mathews.abreu\Documentos\Contratos\Contrato_Cliente.pdf</span>
-                                </td>
-                                <td class="p-3 border-b border-gray-600">
-                                    C:\Users\mathews.abreu\Documentos\Contratos\Contrato_Cliente.pdf
-                                    <button class="copy-cell-btn" onclick="copyToClipboard('fullPath24')" title="Copiar caminho completo">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                                        </svg>
-                                    </button>
-                                    <span id="fullPath24" style="display:none">C:\Users\mathews.abreu\Documentos\Contratos\Contrato_Cliente.pdf</span>
-                                </td>
-                                <td class="p-3 border-b border-gray-600 text-right">1.53 MB</td>
-                            </tr>
-                            <tr class="row-odd file-done" id="row-5">
-                                <td class="p-3 border-b border-gray-600 text-center">
-                                    <input type="checkbox" id="check-5" class="file-check w-5 h-5 cursor-pointer" 
-                                        onchange="toggleRowDone(this, 'row-5')" checked />
-                                </td>
-                                <td class="p-3 border-b border-gray-600">5</td>
-                                <td class="p-3 border-b border-gray-600 font-medium">
-                                    Requisitos_Projeto.txt
-                                    <button class="copy-cell-btn" onclick="copyToClipboard('fullPath5')" title="Copiar caminho completo">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                                        </svg>
-                                    </button>
-                                    <span id="fullPath5" style="display:none">C:\Users\mathews.abreu\Documentos\Projetos\Requisitos_Projeto.txt</span>
-                                </td>
-                                <td class="p-3 border-b border-gray-600">
-                                    C:\Users\mathews.abreu\Documentos\Projetos\Requisitos_Projeto.txt
-                                    <button class="copy-cell-btn" onclick="copyToClipboard('fullPath25')" title="Copiar caminho completo">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                                        </svg>
-                                    </button>
-                                    <span id="fullPath25" style="display:none">C:\Users\mathews.abreu\Documentos\Projetos\Requisitos_Projeto.txt</span>
-                                </td>
-                                <td class="p-3 border-b border-gray-600 text-right">42.7 KB</td>
-                            </tr>
+                            <!-- Os arquivos serão gerados dinamicamente pelo JavaScript -->
                         </tbody>
                     </table>
                 </div>
@@ -903,12 +764,132 @@
     <div id="copyNotification" class="copy-notification">Copiado para a área de transferência!</div>
     
     <script>
+        // Dados simulados para a tabela
+        const mockFiles = [
+            { id: 1, name: "Relatório_Anual_2024.docx", path: "C:\\Users\\mathews.abreu\\Documentos\\Relatórios\\Relatório_Anual_2024.docx", size: "3.45 MB" },
+            { id: 2, name: "Apresentação_Q1.pptx", path: "C:\\Users\\mathews.abreu\\Documentos\\Apresentações\\Apresentação_Q1.pptx", size: "8.72 MB" },
+            { id: 3, name: "Planilha_Financeira.xlsx", path: "C:\\Users\\mathews.abreu\\Documentos\\Financeiro\\Planilha_Financeira.xlsx", size: "2.18 MB" },
+            { id: 4, name: "Contrato_Cliente.pdf", path: "C:\\Users\\mathews.abreu\\Documentos\\Contratos\\Contrato_Cliente.pdf", size: "1.53 MB" },
+            { id: 5, name: "Requisitos_Projeto.txt", path: "C:\\Users\\mathews.abreu\\Documentos\\Projetos\\Requisitos_Projeto.txt", size: "42.7 KB" },
+            { id: 6, name: "Logo_Empresa.png", path: "C:\\Users\\mathews.abreu\\Documentos\\Marketing\\Logo_Empresa.png", size: "256 KB" },
+            { id: 7, name: "Manual_Usuario.pdf", path: "C:\\Users\\mathews.abreu\\Documentos\\Manuais\\Manual_Usuario.pdf", size: "4.32 MB" },
+            { id: 8, name: "Ata_Reuniao.docx", path: "C:\\Users\\mathews.abreu\\Documentos\\Reuniões\\Ata_Reuniao.docx", size: "1.25 MB" },
+            { id: 9, name: "Plano_Estrategico.pptx", path: "C:\\Users\\mathews.abreu\\Documentos\\Estratégia\\Plano_Estrategico.pptx", size: "7.84 MB" },
+            { id: 10, name: "Analise_Mercado.xlsx", path: "C:\\Users\\mathews.abreu\\Documentos\\Análises\\Analise_Mercado.xlsx", size: "3.65 MB" },
+            { id: 11, name: "Política_Privacidade.pdf", path: "C:\\Users\\mathews.abreu\\Documentos\\Jurídico\\Política_Privacidade.pdf", size: "890 KB" },
+            { id: 12, name: "Cronograma_Projeto.xlsx", path: "C:\\Users\\mathews.abreu\\Documentos\\Projetos\\Cronograma_Projeto.xlsx", size: "1.12 MB" },
+            { id: 13, name: "Organograma.png", path: "C:\\Users\\mathews.abreu\\Documentos\\RH\\Organograma.png", size: "340 KB" },
+            { id: 14, name: "Planejamento_2025.docx", path: "C:\\Users\\mathews.abreu\\Documentos\\Planejamento\\Planejamento_2025.docx", size: "2.23 MB" },
+            { id: 15, name: "Orçamento_Anual.xlsx", path: "C:\\Users\\mathews.abreu\\Documentos\\Financeiro\\Orçamento_Anual.xlsx", size: "1.78 MB" },
+            { id: 16, name: "Portfolio_Produtos.pdf", path: "C:\\Users\\mathews.abreu\\Documentos\\Marketing\\Portfolio_Produtos.pdf", size: "15.4 MB" },
+            { id: 17, name: "Configuracao_Sistema.txt", path: "C:\\Users\\mathews.abreu\\Documentos\\TI\\Configuracao_Sistema.txt", size: "18.5 KB" },
+            { id: 18, name: "Relatorio_Vendas.xlsx", path: "C:\\Users\\mathews.abreu\\Documentos\\Vendas\\Relatorio_Vendas.xlsx", size: "5.67 MB" },
+            { id: 19, name: "Certificado_ISO.pdf", path: "C:\\Users\\mathews.abreu\\Documentos\\Certificações\\Certificado_ISO.pdf", size: "1.15 MB" },
+            { id: 20, name: "Estudo_Caso.docx", path: "C:\\Users\\mathews.abreu\\Documentos\\Estudos\\Estudo_Caso.docx", size: "3.28 MB" },
+            { id: 21, name: "Especificação_Técnica.docx", path: "C:\\Users\\mathews.abreu\\Documentos\\Técnico\\Especificação_Técnica.docx", size: "2.76 MB" },
+            { id: 22, name: "Fluxograma_Processo.png", path: "C:\\Users\\mathews.abreu\\Documentos\\Processos\\Fluxograma_Processo.png", size: "425 KB" },
+            { id: 23, name: "Inventario_TI.xlsx", path: "C:\\Users\\mathews.abreu\\Documentos\\TI\\Inventario_TI.xlsx", size: "1.32 MB" },
+            { id: 24, name: "Contrato_Fornecedor.pdf", path: "C:\\Users\\mathews.abreu\\Documentos\\Contratos\\Contrato_Fornecedor.pdf", size: "2.45 MB" },
+            { id: 25, name: "Manual_Interno.pdf", path: "C:\\Users\\mathews.abreu\\Documentos\\Manuais\\Manual_Interno.pdf", size: "6.78 MB" },
+            { id: 26, name: "Diretrizes_Marca.pdf", path: "C:\\Users\\mathews.abreu\\Documentos\\Marketing\\Diretrizes_Marca.pdf", size: "4.92 MB" },
+            { id: 27, name: "Relatório_Despesas.xlsx", path: "C:\\Users\\mathews.abreu\\Documentos\\Financeiro\\Relatório_Despesas.xlsx", size: "1.25 MB" },
+            { id: 28, name: "Timeline_Projeto.pptx", path: "C:\\Users\\mathews.abreu\\Documentos\\Projetos\\Timeline_Projeto.pptx", size: "3.56 MB" },
+            { id: 29, name: "Plano_Marketing.docx", path: "C:\\Users\\mathews.abreu\\Documentos\\Marketing\\Plano_Marketing.docx", size: "2.87 MB" },
+            { id: 30, name: "Lista_Contatos.xlsx", path: "C:\\Users\\mathews.abreu\\Documentos\\Contatos\\Lista_Contatos.xlsx", size: "765 KB" },
+            { id: 31, name: "Backup_Database.sql", path: "C:\\Users\\mathews.abreu\\Documentos\\TI\\Backup_Database.sql", size: "24.5 MB" },
+            { id: 32, name: "Política_Segurança.pdf", path: "C:\\Users\\mathews.abreu\\Documentos\\Jurídico\\Política_Segurança.pdf", size: "1.08 MB" },
+            { id: 33, name: "Anotações_Reunião.txt", path: "C:\\Users\\mathews.abreu\\Documentos\\Reuniões\\Anotações_Reunião.txt", size: "32.6 KB" },
+            { id: 34, name: "Matriz_SWOT.pptx", path: "C:\\Users\\mathews.abreu\\Documentos\\Estratégia\\Matriz_SWOT.pptx", size: "2.13 MB" },
+            { id: 35, name: "Análise_Concorrência.docx", path: "C:\\Users\\mathews.abreu\\Documentos\\Análises\\Análise_Concorrência.docx", size: "3.42 MB" },
+            { id: 36, name: "Planilha_Cálculos.xlsx", path: "C:\\Users\\mathews.abreu\\Documentos\\Financeiro\\Planilha_Cálculos.xlsx", size: "1.95 MB" },
+            { id: 37, name: "Instruções_Instalação.txt", path: "C:\\Users\\mathews.abreu\\Documentos\\TI\\Instruções_Instalação.txt", size: "28.4 KB" },
+            { id: 38, name: "Catálogo_2024.pdf", path: "C:\\Users\\mathews.abreu\\Documentos\\Marketing\\Catálogo_2024.pdf", size: "18.7 MB" },
+            { id: 39, name: "Contrato_Parceria.pdf", path: "C:\\Users\\mathews.abreu\\Documentos\\Contratos\\Contrato_Parceria.pdf", size: "2.24 MB" },
+            { id: 40, name: "Avaliação_Desempenho.docx", path: "C:\\Users\\mathews.abreu\\Documentos\\RH\\Avaliação_Desempenho.docx", size: "1.68 MB" },
+            { id: 41, name: "Proposta_Comercial.pdf", path: "C:\\Users\\mathews.abreu\\Documentos\\Vendas\\Proposta_Comercial.pdf", size: "3.95 MB" },
+            { id: 42, name: "Código_Conduta.pdf", path: "C:\\Users\\mathews.abreu\\Documentos\\RH\\Código_Conduta.pdf", size: "1.37 MB" }
+        ];
+
+        // Salvar/restaurar estado dos arquivos processados
+        function saveFileState() {
+            const checkboxStates = {};
+            document.querySelectorAll('.file-check').forEach(checkbox => {
+                checkboxStates[checkbox.id] = checkbox.checked;
+            });
+            localStorage.setItem('fileProcessingState', JSON.stringify(checkboxStates));
+            updateProgressDisplay();
+        }
+
+        function restoreFileState() {
+            const savedState = localStorage.getItem('fileProcessingState');
+            if (savedState) {
+                const checkboxStates = JSON.parse(savedState);
+                document.querySelectorAll('.file-check').forEach(checkbox => {
+                    if (checkboxStates[checkbox.id] !== undefined) {
+                        checkbox.checked = checkboxStates[checkbox.id];
+                        if (checkbox.checked) {
+                            const rowId = checkbox.id.replace('check-', 'row-');
+                            const row = document.getElementById(rowId);
+                            if (row) {
+                                row.classList.add('file-done');
+                            }
+                        }
+                    }
+                });
+                updateProgressDisplay();
+            }
+        }
+
+        // Atualizar o progresso
+        function updateProgressDisplay() {
+            const totalFiles = mockFiles.length;
+            let completedFiles = 0;
+            
+            document.querySelectorAll('.file-check').forEach(checkbox => {
+                if (checkbox.checked) {
+                    completedFiles++;
+                }
+            });
+            
+            const percentage = Math.round((completedFiles / totalFiles) * 100);
+            
+            // Atualizar barra de progresso
+            const progressBar = document.getElementById('progressBar');
+            progressBar.style.width = `${percentage}%`;
+            
+            // Atualizar texto de porcentagem
+            document.getElementById('progressPercentage').textContent = `${percentage}%`;
+            
+            // Atualizar contadores
+            document.getElementById('pendingFiles').textContent = totalFiles - completedFiles;
+            document.getElementById('completedFiles').textContent = completedFiles;
+            
+            // Adicionar/remover classe de animação
+            if (percentage > 0 && percentage < 100) {
+                progressBar.classList.add('pulse');
+            } else {
+                progressBar.classList.remove('pulse');
+            }
+        }
+
+        // Função para marcar/desmarcar arquivo
+        function toggleRowDone(checkbox, rowId) {
+            const row = document.getElementById(rowId);
+            
+            if (checkbox.checked) {
+                row.classList.add('file-done');
+            } else {
+                row.classList.remove('file-done');
+            }
+            
+            saveFileState();
+        }
+
         // Funções para manipulação de cópia
         function copyToClipboard(elementId) {
             const element = document.getElementById(elementId);
             const text = element.innerText || element.textContent;
             
-            // Método moderno com API Clipboard
             if (navigator.clipboard && window.isSecureContext) {
                 navigator.clipboard.writeText(text)
                     .then(() => {
@@ -919,12 +900,10 @@
                         fallbackCopyTextToClipboard(text);
                     });
             } else {
-                // Fallback para contextos não seguros
                 fallbackCopyTextToClipboard(text);
             }
         }
         
-        // Método alternativo para navegadores antigos
         function fallbackCopyTextToClipboard(text) {
             const textArea = document.createElement("textarea");
             textArea.value = text;
@@ -947,42 +926,117 @@
             document.body.removeChild(textArea);
         }
         
-        // Mostrar notificação de cópia
         function showCopyNotification() {
             const notification = document.getElementById('copyNotification');
             notification.classList.add('show');
             
-            // Esconder notificação após 2 segundos
             setTimeout(() => {
                 notification.classList.remove('show');
             }, 2000);
         }
-        
-        // Função para marcar arquivos como processados
-        function toggleRowDone(checkbox, rowId) {
-            const row = document.getElementById(rowId);
+
+        // Gerar tabela de arquivos
+        function generateFilesTable() {
+            const tbody = document.querySelector('#filesTable tbody');
+            tbody.innerHTML = '';
             
-            if (checkbox.checked) {
-                row.classList.add('file-done');
-            } else {
-                row.classList.remove('file-done');
-            }
-            
-            // Em um cenário real, aqui seria feita a atualização do localStorage
-            // e a atualização da barra de progresso
+            mockFiles.forEach((file, index) => {
+                const rowClass = index % 2 === 0 ? 'row-odd' : 'row-even';
+                const row = document.createElement('tr');
+                row.className = rowClass;
+                row.id = `row-${file.id}`;
+                
+                row.innerHTML = `
+                    <td class="p-3 border-b border-gray-600 text-center">
+                        <input type="checkbox" id="check-${file.id}" class="file-check w-5 h-5 cursor-pointer" 
+                               onchange="toggleRowDone(this, 'row-${file.id}')" />
+                    </td>
+                    <td class="p-3 border-b border-gray-600">${file.id}</td>
+                    <td class="p-3 border-b border-gray-600 font-medium">
+                        ${file.name}
+                        <button class="copy-cell-btn" onclick="copyToClipboard('fullPath${file.id}')" title="Copiar caminho completo">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                        </button>
+                        <span id="fullPath${file.id}" style="display:none">${file.path}</span>
+                    </td>
+                    <td class="p-3 border-b border-gray-600">
+                        ${file.path}
+                        <button class="copy-cell-btn" onclick="copyToClipboard('fullPath2${file.id}')" title="Copiar caminho completo">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                        </button>
+                        <span id="fullPath2${file.id}" style="display:none">${file.path}</span>
+                    </td>
+                    <td class="p-3 border-b border-gray-600 text-right">${file.size}</td>
+                `;
+                
+                tbody.appendChild(row);
+            });
         }
-        
-        // Simulação dos gráficos utilizando Chart.js
+
+        // Inicialização dos gráficos e tabela
         document.addEventListener('DOMContentLoaded', function() {
-            // Gráfico de distribuição por tamanho
+            // Gerar tabela de arquivos
+            generateFilesTable();
+            
+            // Inicializar DataTable
+            const table = $('#filesTable').DataTable({
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.10.21/i18n/Portuguese-Brasil.json'
+                },
+                pageLength: 10,
+                lengthMenu: [5, 10, 25, 50],
+                autoWidth: false,
+                drawCallback: function() {
+                    // Restaurar estado dos checkboxes após redraw
+                    restoreFileState();
+                }
+            });
+            
+            // Dados para os gráficos
+            const sizeData = [
+                { label: 'Arquivos 0B a 10KB', value: 5 },
+                { label: 'Arquivos 10KB a 100KB', value: 12 },
+                { label: 'Arquivos 100KB a 10MB', value: 18 },
+                { label: 'Arquivos 10MB a 1GB', value: 6 },
+                { label: 'Arquivos Acima de 1GB', value: 1 }
+            ];
+            
+            const extensionData = [
+                { label: '.docx', value: 8 },
+                { label: '.pdf', value: 10 },
+                { label: '.xlsx', value: 7 },
+                { label: '.pptx', value: 5 },
+                { label: '.txt', value: 4 },
+                { label: '.png', value: 3 },
+                { label: '.jpg', value: 2 },
+                { label: '.sql', value: 1 },
+                { label: '.zip', value: 1 },
+                { label: '.html', value: 1 }
+            ];
+            
+            const dirData = [
+                { label: 'Projetos (7 arquivos)', value: 7 },
+                { label: 'Financeiro (6 arquivos)', value: 6 },
+                { label: 'Marketing (6 arquivos)', value: 6 },
+                { label: 'TI (5 arquivos)', value: 5 },
+                { label: 'Contratos (4 arquivos)', value: 4 }
+            ];
+
+            // Gráfico de tamanho
             const sizeCtx = document.getElementById('sizeChart').getContext('2d');
             const sizeChart = new Chart(sizeCtx, {
                 type: 'bar',
                 data: {
-                    labels: ['Arquivos 0B a 10KB', 'Arquivos 10KB a 100KB', 'Arquivos 100KB a 10MB', 'Arquivos 10MB a 1GB', 'Arquivos Acima de 1GB'],
+                    labels: sizeData.map(item => item.label),
                     datasets: [{
                         label: 'Quantidade de Arquivos',
-                        data: [5, 12, 18, 6, 1],
+                        data: sizeData.map(item => item.value),
                         backgroundColor: ['#A86BD2', '#1E90FF', '#32CD32', '#FFA500', '#FF0000'],
                         borderColor: '#111827',
                         borderWidth: 1
@@ -1027,10 +1081,10 @@
             const extChart = new Chart(extCtx, {
                 type: 'bar',
                 data: {
-                    labels: ['.docx', '.pdf', '.xlsx', '.pptx', '.txt', '.jpg', '.png', '.mp4', '.zip', '.html'],
+                    labels: extensionData.map(item => item.label),
                     datasets: [{
                         label: 'Quantidade',
-                        data: [8, 7, 6, 5, 4, 3, 3, 2, 2, 2],
+                        data: extensionData.map(item => item.value),
                         backgroundColor: '#3b82f6',
                         borderWidth: 0
                     }]
@@ -1070,10 +1124,10 @@
             const dirChart = new Chart(dirCtx, {
                 type: 'bar',
                 data: {
-                    labels: ['Projetos (12 arquivos)', 'Relatórios (10 arquivos)', 'Apresentações (8 arquivos)', 'Contratos (7 arquivos)', 'Financeiro (5 arquivos)'],
+                    labels: dirData.map(item => item.label),
                     datasets: [{
                         label: 'Arquivos',
-                        data: [12, 10, 8, 7, 5],
+                        data: dirData.map(item => item.value),
                         backgroundColor: '#10b981',
                         borderWidth: 0
                     }]
@@ -1109,15 +1163,11 @@
                 }
             });
             
-            // Inicializar DataTable
-            $('#filesTable').DataTable({
-                language: {
-                    url: '//cdn.datatables.net/plug-ins/1.10.21/i18n/Portuguese-Brasil.json'
-                },
-                pageLength: 10,
-                lengthMenu: [5, 10, 25, 50],
-                autoWidth: false
-            });
+            // Restaurar estado salvo
+            restoreFileState();
+            
+            // Limpar estado (descomente para resetar o progresso)
+            // localStorage.removeItem('fileProcessingState');
         });
     </script>
 </body>
