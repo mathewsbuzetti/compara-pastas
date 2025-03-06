@@ -1,15 +1,18 @@
 # Comparador de Pastas - Versão Aprimorada
+# Autor: Mathews Buzetti
+# GitHub: https://github.com/mathewsbuzetti/powershell-folder-comparison-tool/blob/main/README.md
+# Descrição: Ferramenta para comparar duas pastas e identificar arquivos ausentes
 
-# Variáveis globais para rastreamento
+# Variáveis globais para rastreamento de processamento
 $global:totalFiles = 0
 $global:processedItems = 0
-$global:folder1Files = @()  # Antes era $global:networkFiles
-$global:folder2Files = @()  # Antes era $global:localFiles
+$global:folder1Files = @()
+$global:folder2Files = @()
 $global:uniqueFiles = @()
-$global:scriptStartTime = $null # Variável global para rastrear o tempo total
+$global:scriptStartTime = $null # Variável para medir tempo total de execução
 
 # Configuração de processamento paralelo
-$global:defaultMaxThreads = [Environment]::ProcessorCount  # Número de threads baseado nos cores do processador
+$global:defaultMaxThreads = [Environment]::ProcessorCount  # Utiliza todos os núcleos disponíveis por padrão
 
 function Enable-LongPaths {
     param([string]$Path)
@@ -38,20 +41,20 @@ function Show-AdvancedProgress {
     # Evitar divisão por zero
     if ($Total -eq 0) { $Total = 1 }
     
-    # Calcular porcentagem
+    # Calcular porcentagem de conclusão
     $percentage = [math]::Min(100, [math]::Max(0, [math]::Round(($Current / $Total) * 100, 1)))
     
     # Configurar tamanho da barra
     $barSize = 40
     $fillSize = [math]::Round(($percentage / 100) * $barSize)
     
-    # Cores dinâmicas baseadas na porcentagem - CORES MELHORADAS
+    # Definir cores dinâmicas baseadas na porcentagem
     $colors = @('Blue', 'Cyan', 'Green', 'Yellow', 'DarkCyan')
     $colorIndex = [math]::Floor($percentage / (100 / ($colors.Count - 1)))
     $colorIndex = [math]::Min($colorIndex, $colors.Count - 1)
     $barColor = $colors[$colorIndex]
     
-    # Criar barras de progresso 
+    # Criar barras de progresso com caracteres Unicode
     $fill = "█" * $fillSize
     $empty = "░" * ($barSize - $fillSize)
     
@@ -70,7 +73,7 @@ function Show-AdvancedProgress {
         "Concluindo..."
     }
     
-    # Velocidade de processamento
+    # Calcular velocidade de processamento
     $processingSpeed = if ($elapsedTime.TotalSeconds -gt 0) {
         $itemsPerSecond = $Current / $elapsedTime.TotalSeconds
         if ($itemsPerSecond -gt 1) {
@@ -86,30 +89,30 @@ function Show-AdvancedProgress {
         # Limpar linha anterior
         Write-Host "`r" -NoNewline
         
-        # Estágio atual
+        # Mostrar estágio atual
         Write-Host "╭─ " -NoNewline -ForegroundColor Cyan
         Write-Host "$Stage " -NoNewline -ForegroundColor White
         Write-Host "─╮" -ForegroundColor Cyan
         
-        # Barra de progresso
+        # Exibir barra de progresso
         Write-Host "│ " -NoNewline -ForegroundColor Cyan
         Write-Host "[$fill" -NoNewline -ForegroundColor $barColor
         Write-Host "$empty] " -NoNewline -ForegroundColor DarkGray
         Write-Host "$percentage%" -NoNewline -ForegroundColor Yellow
         
-        # Segunda linha: Contadores e tempo estimado
+        # Exibir contadores e velocidade
         Write-Host "`n├─ " -NoNewline -ForegroundColor Cyan
         Write-Host "$Current de $Total" -NoNewline -ForegroundColor White
         Write-Host " | " -NoNewline -ForegroundColor DarkGray
         Write-Host "$processingSpeed" -NoNewline -ForegroundColor Cyan
         
-        # Status adicional se fornecido
+        # Mostrar status adicional se fornecido
         if ($Status -ne "") {
             Write-Host "`n├─ " -NoNewline -ForegroundColor Cyan
             Write-Host "$Status" -NoNewline -ForegroundColor Yellow
         }
         
-        # Tempo restante
+        # Exibir tempo restante
         Write-Host "`n╰─ " -NoNewline -ForegroundColor Cyan
         Write-Host "Restante: " -NoNewline -ForegroundColor DarkGray
         Write-Host "$timeLeft" -NoNewline -ForegroundColor Yellow
@@ -129,7 +132,7 @@ function Scan-DirectoriesParallel {
         [string]$BasePath,
         [int]$MaxThreads = 4,
         [string]$Stage = "Processando",
-        [string]$FolderLabel = "Pasta" # Identificar Pasta 1 ou Pasta 2
+        [string]$FolderLabel = "Pasta" # Identificador da pasta atual
     )
     
     $startTime = [DateTime]::Now
@@ -142,13 +145,13 @@ function Scan-DirectoriesParallel {
     Write-Host "$MaxThreads" -ForegroundColor Magenta
     
     try {
-        # Inicialmente, obter todos os arquivos na raiz
+        # Inicializar - obter arquivos da raiz
         $rootFiles = @(Get-ChildItem -Path $BasePath -File -ErrorAction SilentlyContinue)
         
-        # Obter lista de diretórios de primeiro nível
+        # Obter diretórios de primeiro nível
         $topDirs = @(Get-ChildItem -Path $BasePath -Directory -ErrorAction SilentlyContinue)
         
-        # Criar lista para armazenar todos os arquivos
+        # Criar estrutura concorrente para armazenar todos os arquivos
         $allFiles = [System.Collections.Concurrent.ConcurrentBag[object]]::new()
         
         # Adicionar arquivos da raiz à lista
@@ -156,24 +159,24 @@ function Scan-DirectoriesParallel {
             $allFiles.Add($file)
         }
         
-        # Preparar diretórios para processamento
+        # Preparar processamento de diretórios
         $totalDirs = $topDirs.Count
         $processedDirs = 0
         
-        # Usar RunspacePool para processamento paralelo
+        # Configurar pool de execução paralela
         $sessionState = [System.Management.Automation.Runspaces.InitialSessionState]::CreateDefault()
         $pool = [RunspaceFactory]::CreateRunspacePool(1, $MaxThreads, $sessionState, $Host)
         $pool.ApartmentState = "MTA"
         $pool.Open()
         
-        # Lista para armazenar todos os jobs
+        # Lista para armazenar jobs
         $jobs = @()
         
-        # Função script para processar cada diretório em paralelo
+        # Bloco de script para execução em paralelo
         $scriptBlock = {
             param($directory)
             
-            # Obter todos os arquivos recursivamente neste diretório
+            # Obter arquivos recursivamente
             try {
                 return @(Get-ChildItem -Path $directory.FullName -Recurse -File -ErrorAction SilentlyContinue)
             }
@@ -195,16 +198,16 @@ function Scan-DirectoriesParallel {
             }
         }
         
-        # Processar e coletar resultados
+        # Processar resultados
         foreach ($job in $jobs) {
             try {
                 $processedDirs++
                 
-                # Mostrar progresso
+                # Exibir progresso
                 $status = "Escaneando: $($job.Directory.Name)"
                 Show-AdvancedProgress -Stage "$FolderLabel - $Stage" -Current $processedDirs -Total $totalDirs -StartTime $startTime -Status $status
                 
-                # Obter resultado deste job
+                # Obter resultados do job
                 $dirFiles = $job.PowerShell.EndInvoke($job.Result)
                 
                 # Adicionar arquivos à lista global
@@ -220,12 +223,12 @@ function Scan-DirectoriesParallel {
                 Write-Host "Erro ao finalizar job para $($job.Directory.FullName): $($_.Exception.Message)" -ForegroundColor Red
             }
             finally {
-                # Limpar recursos
+                # Liberar recursos
                 $job.PowerShell.Dispose()
             }
         }
         
-        # Fechar o pool
+        # Encerrar o pool
         $pool.Close()
         $pool.Dispose()
         
@@ -238,7 +241,7 @@ function Scan-DirectoriesParallel {
         Write-Host "└─ Arquivos encontrados: " -NoNewline -ForegroundColor DarkGray
         Write-Host "$($allFiles.Count)" -ForegroundColor White
         
-        # Converter ConcurrentBag para array normal
+        # Converter ConcurrentBag para array padrão
         return $allFiles.ToArray()
     }
     catch {
@@ -251,7 +254,7 @@ function Scan-DirectoriesISE {
     param(
         [string]$BasePath,
         [string]$Stage = "Processando",
-        [string]$FolderLabel = "Pasta"  # Novo parâmetro para identificar Pasta 1 ou Pasta 2
+        [string]$FolderLabel = "Pasta"  # Identificador da pasta atual
     )
     
     $startTime = [DateTime]::Now
@@ -265,11 +268,11 @@ function Scan-DirectoriesISE {
     try {
         $allFiles = @()
         
-        # Obter arquivos da raiz primeiro
+        # Obter arquivos da raiz
         $rootFiles = Get-ChildItem -Path $BasePath -File -ErrorAction SilentlyContinue
         $allFiles += $rootFiles
         
-        # Obter lista de diretórios de primeiro nível
+        # Obter diretórios de primeiro nível
         $topDirs = @(Get-ChildItem -Path $BasePath -Directory -ErrorAction SilentlyContinue)
         $totalDirs = $topDirs.Count
         $processedDirs = 0
@@ -278,7 +281,7 @@ function Scan-DirectoriesISE {
             $processedDirs++
             
             try {
-                # Mostrar diretório atual
+                # Exibir diretório atual
                 $status = "Escaneando: $($dir.Name)"
                 Show-AdvancedProgress -Stage "$FolderLabel - $Stage" -Current $processedDirs -Total $totalDirs -StartTime $startTime -Status $status
                 
@@ -286,7 +289,7 @@ function Scan-DirectoriesISE {
                 $dirFiles = Get-ChildItem -Path $dir.FullName -Recurse -File -ErrorAction SilentlyContinue
                 $allFiles += $dirFiles
                 
-                # Atualizar progresso com contagem
+                # Atualizar progresso
                 $status = "Encontrados: $($allFiles.Count) arquivos até agora"
                 Show-AdvancedProgress -Stage "$FolderLabel - $Stage" -Current $processedDirs -Total $totalDirs -StartTime $startTime -Status $status
             }
@@ -363,26 +366,26 @@ function Generate-FileName {
     param(
         [string]$Folder1Path,
         [string]$Folder2Path,
-        [string]$Extension,  # Exemplo: ".html"
-        [string]$BasePath = "C:\temp"  # Pasta base padrão para salvar relatórios
+        [string]$Extension,  # Ex: ".html"
+        [string]$BasePath = "C:\temp"  # Diretório padrão para relatórios
     )
     
-    # Extrai o nome da pasta final do caminho completo
+    # Extrair nome da pasta do caminho completo
     function Get-FolderName {
         param([string]$Path)
         
-        # Remover a barra final se existir
+        # Remover barras finais
         $Path = $Path.TrimEnd('\').TrimEnd('/')
         
-        # Obter o nome da última pasta no caminho
+        # Obter nome da última pasta
         $folderName = Split-Path -Path $Path -Leaf
         
-        # Se o resultado for vazio (ex: para "C:\"), use o drive
+        # Se vazio (ex: raiz de unidade), usar letra da unidade
         if ([string]::IsNullOrEmpty($folderName)) {
             $folderName = $Path.Replace(":", "")
         }
         
-        # Limpar caracteres inválidos para nome de arquivo
+        # Remover caracteres inválidos
         $invalidChars = [IO.Path]::GetInvalidFileNameChars()
         foreach ($char in $invalidChars) {
             $folderName = $folderName.Replace($char, '_')
@@ -391,14 +394,14 @@ function Generate-FileName {
         return $folderName
     }
     
-    # Obter os nomes das pastas
+    # Obter nomes das pastas
     $folder1Name = Get-FolderName -Path $Folder1Path
     $folder2Name = Get-FolderName -Path $Folder2Path
     
-    # Adicionar timestamp para evitar sobrescrever arquivos anteriores
+    # Adicionar timestamp para evitar sobrescritas
     $timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
     
-    # Criar o nome do arquivo
+    # Criar nome do arquivo
     $fileName = "Comparacao_{0}_vs_{1}_{2}{3}" -f $folder1Name, $folder2Name, $timestamp, $Extension
     
     # Garantir que o diretório de destino existe
@@ -406,10 +409,9 @@ function Generate-FileName {
         New-Item -ItemType Directory -Path $BasePath -Force | Out-Null
     }
     
-    # Retornar o caminho completo
+    # Retornar caminho completo
     return Join-Path -Path $BasePath -ChildPath $fileName
 }
-
 function Export-HTMLReport {
     param(
         [array]$UniqueFiles,
@@ -419,29 +421,28 @@ function Export-HTMLReport {
         [int]$Folder1Count,
         [int]$Folder2Count,
         [DateTime]$StartTime,
-        [TimeSpan]$ExecutionTime, # Parâmetro para receber o tempo já calculado
+        [TimeSpan]$ExecutionTime, # Tempo de execução calculado
         [switch]$ShowDebug = $false
     )
     
-    # CORREÇÃO: Usar o tempo de execução passado como parâmetro em vez de recalcular
-    # Se ExecutionTime for fornecido, use-o; caso contrário, calcule com base na hora de início
+    # Usar o tempo de execução fornecido ou calcular com base no tempo de início
     $totalTime = if ($ExecutionTime) { 
         $ExecutionTime 
     } else { 
         [DateTime]::Now - $StartTime 
     }
 
-    # Garantir que tempos pequenos sejam exibidos corretamente
+    # Garantir formatação correta do tempo
     $hours = [Math]::Floor($totalTime.TotalHours)
     $minutes = $totalTime.Minutes
     $seconds = $totalTime.Seconds
 
-    # Arredondar para cima caso seja menor que 1 segundo
+    # Arredondar para 1 segundo se for menor
     if (($totalTime.TotalSeconds -gt 0) -and ($seconds -eq 0)) {
         $seconds = 1
     }
 
-    # CORREÇÃO: Formatar explicitamente para garantir que os zeros sejam exibidos
+    # Formatar o tempo para exibição no console
     $formattedTime = "{0}h {1:D2}m {2:D2}s" -f $hours, $minutes, $seconds
     
     # Analisar os dados para gráficos
@@ -449,7 +450,7 @@ function Export-HTMLReport {
     $totalSize = 0
     $extensionData = @{}
     
-    # CORREÇÃO: Usar OrderedDictionary para garantir a ordem correta das categorias
+    # Categorias de tamanho de arquivos (ordem garantida)
     $sizeRanges = [ordered]@{
         "Arquivos 0B a 10KB" = 0
         "Arquivos 10KB a 100KB" = 0
@@ -458,27 +459,26 @@ function Export-HTMLReport {
         "Arquivos Acima de 1GB" = 0
     }
     
-    # Estrutura para rastrear todos os níveis de diretório
+    # Rastreamento de diretórios
     $dirCounts = @{}
     
-    # Mostrar apenas a mensagem inicial, sem detalhes
+    # Iniciar análise
     Write-Host "`n[INICIANDO ANÁLISE DE DADOS]" -ForegroundColor Yellow
     Write-Host "Total de arquivos para análise: $totalFiles" -ForegroundColor Yellow
     
     foreach ($file in $UniqueFiles) {
-        # Extrair tamanho do arquivo
+        # Extrair e calcular tamanho do arquivo
         $fileSize = 0
         $sizeStr = $file.Tamanho
         
-        # CORREÇÃO: Melhorar a extração do tamanho para lidar com separadores decimais locais e garantir precisão
-        # Remover espaços e caracteres não numéricos antes de converter
+        # Processamento de tamanhos com diferentes unidades
         if ($sizeStr -match "([\d\.\,]+)\s*GB") {
-            # Substituir vírgula por ponto para garantir consistência na conversão
+            # Normalizar separadores decimais
             $sizeValue = ($Matches[1] -replace '\.' -replace ',', '.').Trim()
             try {
                 $fileSize = [double]$sizeValue * 1GB
             } catch {
-                $fileSize = 2GB # Valor padrão alto em caso de erro
+                $fileSize = 2GB # Valor default para erros
             }
         } elseif ($sizeStr -match "([\d\.\,]+)\s*MB") {
             $sizeValue = ($Matches[1] -replace '\.' -replace ',', '.').Trim()
@@ -495,7 +495,7 @@ function Export-HTMLReport {
                 $fileSize = 0
             }
         } else {
-            # Tenta extrair um número puro caso não tenha unidade
+            # Tentar extrair número sem unidade
             if ($sizeStr -match "([\d\.\,]+)") {
                 $sizeValue = ($Matches[1] -replace '\.' -replace ',', '.').Trim()
                 try {
@@ -510,7 +510,7 @@ function Export-HTMLReport {
         
         $totalSize += $fileSize
         
-        # CORREÇÃO: Categorização por tamanho com garantia de que arquivos grandes sejam contabilizados
+        # Categorizar por tamanho
         if ($fileSize -lt 10 * 1KB) {
             $sizeRanges["Arquivos 0B a 10KB"]++
         }
@@ -524,7 +524,6 @@ function Export-HTMLReport {
             $sizeRanges["Arquivos 10MB a 1GB"]++
         }
         else {
-            # CORREÇÃO: Garantir que qualquer arquivo maior ou igual a 1GB seja contabilizado
             $sizeRanges["Arquivos Acima de 1GB"]++
         }
         
@@ -533,12 +532,12 @@ function Export-HTMLReport {
             $fileName = $file.'Nome do Arquivo'
             $ext = [System.IO.Path]::GetExtension($fileName).ToLower()
             
-            # Se a extensão for vazia, use um rótulo especial
+            # Tratar arquivos sem extensão
             if ([string]::IsNullOrEmpty($ext)) { 
                 $ext = "[sem extensão]" 
             }
             
-            # Incrementar contador de extensão
+            # Atualizar contagem
             if ($extensionData.ContainsKey($ext)) {
                 $extensionData[$ext]++
             } else {
@@ -546,14 +545,14 @@ function Export-HTMLReport {
             }
             
         } catch {
-            # Incrementar contador para arquivos com erro
+            # Registrar erros
             if (-not $extensionData.ContainsKey("[erro]")) {
                 $extensionData["[erro]"] = 0
             }
             $extensionData["[erro]"]++
         }
         
-        # Contar por diretório - VERSÃO SIMPLIFICADA PARA MOSTRAR APENAS SUBPASTAS
+        # Contar por diretório (apenas subpastas de primeiro nível)
         try {
             if (-not [string]::IsNullOrEmpty($file.'Caminho Completo') -and -not [string]::IsNullOrEmpty($Folder1Path)) {
                 $fullPath = $file.'Caminho Completo'
@@ -563,39 +562,38 @@ function Export-HTMLReport {
                     $relPath = $fullPath.Substring($Folder1Path.Length).TrimStart('\')
                     $parts = $relPath.Split('\')
                     
-                    # Pegar apenas o primeiro nível de pasta (subpasta)
+                    # Registrar apenas o primeiro nível
                     if ($parts.Length -gt 0 -and -not [string]::IsNullOrEmpty($parts[0])) {
                         $subDir = $parts[0]
                         
-                        # Incrementar contador de diretório
                         if ($dirCounts.ContainsKey($subDir)) {
                             $dirCounts[$subDir]++
                         } else {
                             $dirCounts[$subDir] = 1
                         }
                     } else {
-                        # Se o arquivo estiver na raiz
+                        # Arquivos na raiz
                         if (-not $dirCounts.ContainsKey("(Raiz)")) {
                             $dirCounts["(Raiz)"] = 0
                         }
                         $dirCounts["(Raiz)"]++
                     }
                 } else {
-                    # Caminho não está na rede
+                    # Caminho não pertence à pasta analisada
                     if (-not $dirCounts.ContainsKey("(Outro)")) {
                         $dirCounts["(Outro)"] = 0
                     }
                     $dirCounts["(Outro)"]++
                 }
             } else {
-                # Se o caminho estiver vazio
+                # Caminho vazio
                 if (-not $dirCounts.ContainsKey("(Desconhecido)")) {
                     $dirCounts["(Desconhecido)"] = 0
                 }
                 $dirCounts["(Desconhecido)"]++
             }
         } catch {
-            # Incrementar contador para diretórios com erro
+            # Registrar erros
             if (-not $dirCounts.ContainsKey("(Erro)")) {
                 $dirCounts["(Erro)"] = 0
             }
@@ -603,12 +601,12 @@ function Export-HTMLReport {
         }
     }
     
-    # Criar arrays de objetos simples para os gráficos (mais fácil de serializar)
+    # Preparar dados para gráficos
     $extensionChartArray = @()
     $sizeRangesChartArray = @()
     $dirChartArray = @()
     
-    # Preparar dados de extensão para o gráfico
+    # Preparar dados de extensão (top 10)
     if ($extensionData.Count -gt 0) {
         $extensionData.GetEnumerator() | 
             Sort-Object -Property Value -Descending | 
@@ -621,7 +619,7 @@ function Export-HTMLReport {
             }
     }
     
-    # Se não houver dados de extensão, usar dados fictícios
+    # Dados exemplo caso não existam dados reais
     if ($extensionChartArray.Count -eq 0) {
         $extensionChartArray = @(
             @{ label = ".txt"; value = 10 },
@@ -630,7 +628,7 @@ function Export-HTMLReport {
         )
     }
     
-    # CORREÇÃO: Usar a ordem explícita das categorias de tamanho para o gráfico
+    # Preparar dados de tamanho na ordem pré-definida
     foreach ($category in $sizeRanges.Keys) {
         $sizeRangesChartArray += @{
             label = $category
@@ -638,8 +636,7 @@ function Export-HTMLReport {
         }
     }
     
-    # Preparar dados de diretório para o gráfico com formato simplificado
-    # CORREÇÃO: Alterado de 10 para 5 diretórios
+    # Preparar dados de diretório (top 5)
     if ($dirCounts.Count -gt 0) {
         $dirCounts.GetEnumerator() | 
             Sort-Object -Property Value -Descending | 
@@ -648,18 +645,17 @@ function Export-HTMLReport {
                 $subpasta = $_.Key
                 $arquivos = [int]$_.Value
                 
-                # Remover a extensão HTML se presente
+                # Remover extensão HTML se presente
                 if ($subpasta -match '(.*)\.html$') {
                     $subpasta = $Matches[1]
                 }
                 
-                # Limitar o tamanho do nome para não ficar muito grande no gráfico
+                # Limitar tamanho do nome para visualização
                 if ($subpasta.Length -gt 30) {
                     $subpasta = $subpasta.Substring(0, 27) + "..."
                 }
                 
-                # Formato personalizado para rótulos do gráfico de diretório
-                # Nome da subpasta seguido pelo número de arquivos
+                # Formatar rótulo
                 $labelText = "$subpasta ($arquivos arquivos)"
                 
                 $dirChartArray += @{
@@ -669,7 +665,7 @@ function Export-HTMLReport {
             }
     }
     
-    # Se não houver dados de diretório, usar dados fictícios
+    # Dados exemplo caso não existam dados reais
     if ($dirChartArray.Count -eq 0) {
         $dirChartArray = @(
             @{ label = "Documentos (10 arquivos)"; value = 10 },
@@ -678,18 +674,17 @@ function Export-HTMLReport {
         )
     }
     
-    # Converter para JSON (sem exibir mensagem no console)
+    # Converter para JSON
     $extensionChartJson = $extensionChartArray | ConvertTo-Json -Compress
     $sizeRangesChartJson = $sizeRangesChartArray | ConvertTo-Json -Compress
     $dirChartJson = $dirChartArray | ConvertTo-Json -Compress
     
-    # Substituir aspas duplas por aspas simples escapadas
+    # Substituir aspas duplas por simples para JavaScript
     $extensionChartJson = $extensionChartJson.Replace('"', "'")
     $sizeRangesChartJson = $sizeRangesChartJson.Replace('"', "'")
     $dirChartJson = $dirChartJson.Replace('"', "'")
     
-    # CORREÇÃO: Garantir o formato correto para o tamanho total
-    # Formato de tamanho legível
+    # Formatar tamanho total para exibição
     $formattedTotalSize = if ($totalSize -ge 1TB) {
         "{0:N2} TB" -f ($totalSize / 1TB)
     } elseif ($totalSize -ge 1GB) {
@@ -700,20 +695,20 @@ function Export-HTMLReport {
         "{0:N2} KB" -f ($totalSize / 1KB)
     }
     
-    # Formatar totais com separador de milhar
+    # Formatar contagens para o relatório
     $formattedFolder1Count = '{0:N0}' -f $Folder1Count
     $formattedFolder2Count = '{0:N0}' -f $Folder2Count
     $formattedTotalAnalyzed = '{0:N0}' -f ($Folder1Count + $Folder2Count)
     $formattedUniqueFiles = '{0:N0}' -f $UniqueFiles.Count
     
-    # Formatar data/hora atual
+    # Data e hora do relatório
     $reportDate = Get-Date -Format "dd/MM/yyyy HH:mm:ss"
     
-    # Extrair os nomes das pastas para o título
+    # Extrair nomes das pastas para o título
     $folder1Name = Split-Path -Path $Folder1Path -Leaf
     $folder2Name = Split-Path -Path $Folder2Path -Leaf
     
-    # Se for um drive, extrair apenas a letra
+    # Tratar casos especiais (raiz de unidade)
     if ([string]::IsNullOrEmpty($folder1Name)) {
         $folder1Name = $Folder1Path.Replace(":", "")
     }
@@ -722,14 +717,14 @@ function Export-HTMLReport {
         $folder2Name = $Folder2Path.Replace(":", "")
     }
     
-    # Dados da tabela - CORREÇÃO: Remover limite de 1000 itens
+    # Gerar linhas da tabela
     $tableRows = ""
     $count = 0
     
     foreach ($file in $UniqueFiles) {
         $count++
         
-        # CORREÇÃO: Exibir todos os arquivos sem limite
+        # Processar caminho relativo
         $relativePath = $file.'Caminho Completo'.Substring($Folder1Path.Length).TrimStart('\')
         $fullPath = $file.'Caminho Completo'
         $rowClass = if ($count % 2 -eq 0) { "row-even" } else { "row-odd" }
@@ -765,8 +760,7 @@ function Export-HTMLReport {
 "@
     }
     
-    # CORREÇÃO: Melhorar a inicialização do DataTables com opções de paginação e desempenho
-    # NOVA CORREÇÃO: Corrigido problema com paginação - Alterado initComplete e adicionado callback para eventos de paginação
+    # Código JavaScript para inicialização do DataTables
     $dataTablesInitCode = @'
             // Função para converter tamanho formatado em bytes para ordenação correta
             function convertSizeToBytes(sizeStr) {
@@ -803,7 +797,7 @@ function Export-HTMLReport {
                 return convertSizeToBytes(data);
             };
 
-            // CORREÇÃO: Adiciona fixação de paginação com novo delegate
+            // Configuração de eventos de paginação
             $(document).on('click', '.paginate_button, .paginate_button.current', function(e) {
                 console.log("Clique em botão de paginação detectado");
                 setTimeout(function() {
@@ -823,21 +817,18 @@ function Export-HTMLReport {
                     deferRender: true,
                     processing: true,
                     paging: true,
-                    autoWidth: false,  // IMPORTANTE: Manter falso para evitar recálculo de largura
+                    autoWidth: false,  // Importante para estabilidade
                     stateSave: true,
                     dom: 'lfrtip',
-                    pagingType: 'full_numbers',  // CORREÇÃO: Use paginação completa com todos os controles
+                    pagingType: 'full_numbers',
                     scrollCollapse: false,
-                    // CORREÇÃO: Adicionar configurações para estabilidade de layout
-                    scrollX: true,     // Permitir rolagem horizontal
-                    fixedHeader: true, // Manter cabeçalho fixo
-                    responsive: false, // Desativar responsividade que pode causar problemas
+                    scrollX: true,     // Rolagem horizontal
+                    fixedHeader: true, // Cabeçalho fixo
+                    responsive: false, // Desativar responsividade para maior estabilidade
                     columnDefs: [
-                        // Desativar ordenação na coluna de checkboxes (primeira coluna - índice 0)
+                        // Configurações específicas para cada coluna
                         { orderable: false, targets: 0, width: "50px" },
-                        // Aplicar ordenação personalizada para coluna de tamanho (última coluna - índice 4)
                         { type: 'file-size', targets: 4, width: "120px" },
-                        // Definir larguras explícitas para outras colunas
                         { width: "50px", targets: 1 },  // Coluna #
                         { width: "25%", targets: 2 },   // Nome do Arquivo
                         { width: "auto", targets: 3 }   // Caminho Completo
@@ -847,7 +838,7 @@ function Export-HTMLReport {
                     },
                     initComplete: function() {
                         console.log('DataTable inicializada com sucesso');
-                        // CORREÇÃO: Adicionar delegação de eventos para garantir que os botões de paginação funcionem
+                        // Configurar eventos de paginação
                         $('.dataTables_paginate').on('click', '.paginate_button', function() {
                             console.log('Botão de paginação clicado');
                             setTimeout(function() {
@@ -856,25 +847,25 @@ function Export-HTMLReport {
                             }, 300);
                         });
                         
-                        // Atualizar progresso após inicialização
+                        // Atualizar progresso inicial
                         setTimeout(function() {
                             restoreCheckboxState();
                             updateProgressDisplay();
                             
-                            // CORREÇÃO: Verificação periódica do estado do progresso
+                            // Verificação periódica do estado
                             setInterval(verifyProgressState, 5000);
                         }, 500);
                     },
                     drawCallback: function() {
-                        // Restaurar estado dos checkboxes após mudança de página
+                        // Restaurar estado após mudança de página
                         setTimeout(function() {
                             restoreCheckboxState();
                             updateProgressDisplay();
                             
-                            // CORREÇÃO: Forçar recálculo de larguras de colunas
+                            // Recalcular larguras
                             this.api().columns.adjust();
                             
-                            // CORREÇÃO: Garantir que delegação de eventos esteja funcionando
+                            // Garantir funcionamento dos eventos
                             $('.paginate_button').off('click').on('click', function(e) {
                                 console.log('Clique em botão de paginação (drawCallback)');
                                 setTimeout(function() {
@@ -889,14 +880,14 @@ function Export-HTMLReport {
                 // Inicializar a tabela
                 var table = $('#filesTable').DataTable(tableOptions);
                 
-                // CORREÇÃO: Adicionar listener para quando o número de entradas mudar
+                // Evento para quando mudar o número de itens por página
                 $('#filesTable').on('length.dt', function() {
                     setTimeout(function() {
                         table.columns.adjust().draw();
                     }, 300);
                 });
                 
-                // CORREÇÃO: Verificar se os controles foram renderizados corretamente
+                // Verificar se os controles foram renderizados corretamente
                 if ($('.dataTables_length').length === 0 || $('.dataTables_filter').length === 0) {
                     console.error('Controles do DataTable não foram renderizados corretamente');
                     // Forçar re-renderização
@@ -904,19 +895,19 @@ function Export-HTMLReport {
                     $('#filesTable').DataTable(tableOptions);
                 }
                 
-                // CORREÇÃO: Garantir que o estado inicial seja carregado
+                // Inicialização do estado
                 setTimeout(function() {
                     updateProgressDisplay();
                 }, 1000);
                 
-                // CORREÇÃO: Adicionar manipulador de eventos global para checkboxes
+                // Manipulador global para os checkboxes
                 $(document).on('change', '.file-check', function() {
                     const checkbox = this;
                     const rowId = checkbox.id.replace('check-', 'row-');
                     toggleRowDone(checkbox, rowId);
                 });
                 
-                // CORREÇÃO: Garantir que a paginação funcione mesmo após AJAX
+                // Eventos de paginação globais
                 $(document).off('click', '.paginate_button').on('click', '.paginate_button', function(e) {
                     console.log('Evento de paginação delegado global');
                     setTimeout(function() {
@@ -927,22 +918,20 @@ function Export-HTMLReport {
             });
 '@
 
-    # CORREÇÃO: Código para atualizar o progresso contando todos os checkboxes, 
-    # inclusive os que não estão visíveis na página atual
+    # Código para atualização do progresso
     $updateProgressCode = @'
         // Função para atualizar a exibição de progresso
         function updateProgressDisplay() {
-            // Pegar todos os estados salvos no localStorage
+            // Pegar estados salvos no localStorage
             const savedState = localStorage.getItem('fileChecksState');
             let completedFiles = 0;
             
             if (savedState) {
                 try {
                     const state = JSON.parse(savedState);
-                    // Contar quantos itens estão marcados como true
+                    // Contar itens marcados como concluídos
                     completedFiles = Object.values(state).filter(value => value === true).length;
                     
-                    // Log para debug da contagem
                     console.log(`Contados ${completedFiles} arquivos concluídos de ${Object.keys(state).length} total`);
                 } catch (e) {
                     console.error('Erro ao analisar o estado salvo:', e);
@@ -951,22 +940,22 @@ function Export-HTMLReport {
                 }
             }
             
-            // CORREÇÃO: Obter o número total real de arquivos
+            // Obter total de arquivos
             const totalFilesCount = parseInt(document.getElementById('totalFiles').textContent.replace(/\D/g, ''));
             
-            // Calcular o percentual
+            // Calcular percentual de conclusão
             const percentage = totalFilesCount > 0 ? Math.round((completedFiles / totalFilesCount) * 100) : 0;
             
-            // Atualizar os elementos visuais
+            // Atualizar elementos da interface
             const progressBar = document.getElementById('progressBar');
             const percentageDisplay = document.getElementById('progressPercentage');
             const pendingFilesDisplay = document.getElementById('pendingFiles');
             const completedFilesDisplay = document.getElementById('completedFiles');
             
-            // Atualizar a barra de progresso
+            // Atualizar barra de progresso
             if (progressBar) progressBar.style.width = `${percentage}%`;
             
-            // Adicionar ou remover a classe de animação de pulso
+            // Efeito visual de pulso durante o progresso
             if (progressBar) {
                 if (percentage > 0 && percentage < 100) {
                     progressBar.classList.add('pulse');
@@ -975,7 +964,7 @@ function Export-HTMLReport {
                 }
             }
             
-            // CORREÇÃO: Atualizar os contadores com o número real
+            // Atualizar contadores
             if (percentageDisplay) percentageDisplay.textContent = `${percentage}%`;
             if (pendingFilesDisplay) pendingFilesDisplay.textContent = totalFilesCount - completedFiles;
             if (completedFilesDisplay) completedFilesDisplay.textContent = completedFiles;
@@ -984,7 +973,7 @@ function Export-HTMLReport {
         }
 '@
 
-    # CORREÇÃO: Melhorar a restauração dos checkboxes para funcionar com paginação
+    # Código para restaurar estado dos checkboxes
     $restoreCheckboxState = @'
         // Restaurar estado dos checkboxes
         function restoreCheckboxState() {
@@ -1010,7 +999,7 @@ function Export-HTMLReport {
                     
                     console.log(`Restaurado estado de ${visibleCheckboxes.length} checkboxes visíveis`);
                     
-                    // Log para debug do estado restaurado
+                    // Para depuração
                     const checkedCount = Object.values(state).filter(value => value === true).length;
                     console.log(`Restaurado dados: total de ${Object.keys(state).length} itens no estado, ${checkedCount} marcados como concluídos`);
                 } catch (e) {
@@ -1022,12 +1011,12 @@ function Export-HTMLReport {
         }
 '@
 
-    # CORREÇÃO: Código para salvar o estado dos checkboxes
+    # Código para salvar estado dos checkboxes
     $saveCheckboxState = @'
         // Salvar estado de todos os checkboxes
         function saveCheckboxState() {
             try {
-                // Primeiro, pegar qualquer estado salvo anteriormente
+                // Recuperar estado anterior
                 let savedState = {};
                 const savedStateStr = localStorage.getItem('fileChecksState');
                 
@@ -1045,7 +1034,7 @@ function Export-HTMLReport {
                 localStorage.setItem('fileChecksState', JSON.stringify(savedState));
                 console.log(`Salvo estado de ${visibleCheckboxes.length} checkboxes visíveis`);
                 
-                // Log para debug do estado salvo
+                // Para depuração
                 const checkedCount = Object.values(savedState).filter(value => value === true).length;
                 console.log(`Total de ${Object.keys(savedState).length} itens no estado, ${checkedCount} marcados como concluídos`);
             } catch (e) {
@@ -1054,7 +1043,7 @@ function Export-HTMLReport {
         }
 '@
 
-    # CORREÇÃO: Função para verificar estado do progresso
+    # Código para verificação periódica do estado
     $verifyProgressState = @'
         // Verificar estado do progresso periodicamente
         function verifyProgressState() {
@@ -1068,7 +1057,7 @@ function Export-HTMLReport {
                     
                     console.log(`VERIFICAÇÃO: ${checkedCount} itens marcados como concluídos de ${totalCount} total`);
                     
-                    // Atualizar exibição de progresso
+                    // Atualizar interface se necessário
                     const completedFilesDisplay = document.getElementById('completedFiles');
                     if (completedFilesDisplay) {
                         const currentDisplayed = parseInt(completedFilesDisplay.textContent);
@@ -1096,9 +1085,9 @@ function Export-HTMLReport {
         }
 '@
 
-    # CORREÇÃO: Função para lidar com o clique nos botões de paginação
+    # Código para eventos de paginação
     $paginationHandler = @'
-        // CORREÇÃO: Adicionar manipulador de eventos especifico para paginação
+        // Configuração de manipuladores para paginação
         function setupPaginationHandlers() {
             console.log("Configurando manipuladores de paginação");
             
@@ -1111,7 +1100,7 @@ function Export-HTMLReport {
                 }, 300);
             });
             
-            // Adicionar manipulador direto à div .dataTables_paginate
+            // Eventos diretos no container de paginação
             $('.dataTables_paginate').off('click.pagination').on('click.pagination', '.paginate_button', function(e) {
                 console.log("Botão de paginação clicado via container");
                 setTimeout(function() {
@@ -1122,9 +1111,9 @@ function Export-HTMLReport {
         }
 '@
 
-    # CORREÇÃO: Código para gráficos - garantir que todas as categorias do gráfico sejam mostradas
+    # Código para inicialização de gráficos
     $chartInitCode = @'
-            // Verificar se os elementos canvas existem
+            // Verificar existência dos elementos canvas
             if (!document.getElementById('sizeChart')) {
                 console.error('Elemento sizeChart não encontrado!');
             }
@@ -1135,13 +1124,13 @@ function Export-HTMLReport {
                 console.error('Elemento dirChart não encontrado!');
             }
             
-            // CORREÇÃO: Detectar e corrigir problemas no gráfico após renderização
+            // Monitoramento e correção de gráficos
             function checkChartVisibility(chartId, expectedLabels) {
                 setTimeout(function() {
                     const chartElement = document.getElementById(chartId);
                     if (chartElement && chartElement.__chartjs__ && chartElement.__chartjs__.active === false) {
                         console.warn(`Problema detectado no gráfico ${chartId}, tentando recriar...`);
-                        // O gráfico está inativo, tentar recriar
+                        // Recriar gráfico inativo
                         const ctx = chartElement.getContext('2d');
                         if (ctx && window.chartConfigs && window.chartConfigs[chartId]) {
                             new Chart(ctx, window.chartConfigs[chartId]);
@@ -1150,50 +1139,48 @@ function Export-HTMLReport {
                 }, 1000);
             }
             
-            // Inicializar objeto global para armazenar configurações de gráficos
+            // Armazenar configurações de gráficos
             window.chartConfigs = {};
 '@
 
-    # CORREÇÃO: Adicionar código para garantir que o gráfico mostre arquivos grandes
+    # Código para gráfico de tamanhos
     $saveSizeChartData = @'
-            // CORREÇÃO PRIORITÁRIA: Garantir que arquivos acima de 1GB apareçam no gráfico
+            // Processamento especial para o gráfico de tamanho
             console.log("Processando dados para o gráfico de tamanho:", sizeData);
             
-            // FORÇAR valor mínimo para arquivos grandes (garantindo visibilidade)
+            // Ajustar visualização para arquivos grandes
             const bigFilesCategory = sizeData.find(item => item.label === "Arquivos Acima de 1GB");
             if (bigFilesCategory) {
                 console.log("Valor original para 'Arquivos Acima de 1GB':", bigFilesCategory.value);
                 
-                // Se houver pelo menos 1 arquivo grande, garantir que seja visível no gráfico
+                // Garantir visibilidade para arquivos grandes
                 if (bigFilesCategory.value > 0 && bigFilesCategory.value < 5) {
-                    // Para arquivos grandes, uma pequena quantidade ainda é significativa
-                    // Forçar um valor mínimo de exibição para garantir visibilidade
                     console.log("Ajustando visualização para tornar arquivos grandes visíveis");
                     
-                    // Apenas para visualização - não altera os dados exibidos nos tooltips
+                    // Valor mínimo para visualização
                     const minDisplayValue = 10; 
                     
-                    // Guardar o valor original para mostrar no tooltip
+                    // Preservar valor original para tooltips
                     bigFilesCategory.originalValue = bigFilesCategory.value;
                     bigFilesCategory.displayAdjusted = true;
                     
-                    // Ajustar o valor para visualização
+                    // Ajustar valor para visualização
                     bigFilesCategory.value = minDisplayValue;
                 }
             } else {
                 console.error("Categoria 'Arquivos Acima de 1GB' não encontrada nos dados!");
             }
             
-            // MODIFICAÇÃO: Cores mais vibrantes para facilitar identificação
+            // Cores para categorias de tamanho
             const sizeChartColors = [
                 '#A86BD2', // Roxo (0B a 10KB)
                 '#1E90FF', // Azul (10KB a 100KB)
                 '#32CD32', // Verde (100KB a 10MB)
                 '#FFA500', // Laranja (10MB a 1GB)
-                '#FF0000'  // Vermelho (Acima de 1GB) - mais vibrante
+                '#FF0000'  // Vermelho (Acima de 1GB)
             ];
             
-            // MODIFICAÇÃO: Configuração para gráfico de barras horizontais
+            // Configuração do gráfico de tamanho
             window.chartConfigs.sizeChart = {
                 type: 'bar',
                 data: {
@@ -1208,7 +1195,7 @@ function Export-HTMLReport {
                     }]
                 },
                 options: {
-                    indexAxis: 'y',  // Eixo horizontal para melhor visualização
+                    indexAxis: 'y',  // Barras horizontais
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
@@ -1227,12 +1214,12 @@ function Export-HTMLReport {
                             callbacks: {
                                 label: function(context) {
                                     const dataItem = sizeData[context.dataIndex];
-                                    // Se o valor foi ajustado, mostrar o valor original
+                                    // Usar valor original se ajustado
                                     let value = dataItem.displayAdjusted ? dataItem.originalValue : context.raw;
                                     const total = sizeData.reduce((a, b) => a + (typeof b === 'object' ? 
                                         (b.displayAdjusted ? b.originalValue : b.value) : 0), 0);
                                     
-                                    // Calcular a porcentagem baseada no valor real, não no ajustado
+                                    // Calcular porcentagem baseada em valores reais
                                     const percentage = Math.round((value / total) * 100);
                                     return `${value} arquivos (${percentage}%)`;
                                 }
@@ -1264,14 +1251,14 @@ function Export-HTMLReport {
                 }
             };
             
-            // Renderizar o gráfico
+            // Renderizar gráfico de tamanho
             const sizeCtx = document.getElementById('sizeChart').getContext('2d');
             new Chart(sizeCtx, window.chartConfigs.sizeChart);
             
-            // Verificar se o gráfico está visível após renderização
+            // Verificar renderização
             checkChartVisibility('sizeChart');
             
-            // Gráfico de extensões (barra vertical)
+            // Gráfico de extensões (barras verticais)
             window.chartConfigs.extensionChart = {
                 type: 'bar',
                 data: {
@@ -1322,10 +1309,11 @@ function Export-HTMLReport {
                 }
             };
             
+            // Renderizar gráfico de extensões
             const extCtx = document.getElementById('extensionChart').getContext('2d');
             new Chart(extCtx, window.chartConfigs.extensionChart);
             
-            // Gráfico de diretórios (barra horizontal)
+            // Gráfico de diretórios (barras horizontais)
             window.chartConfigs.dirChart = {
                 type: 'bar',
                 data: {
@@ -1377,33 +1365,34 @@ function Export-HTMLReport {
                 }
             };
             
+            // Renderizar gráfico de diretórios
             const dirCtx = document.getElementById('dirChart').getContext('2d');
             new Chart(dirCtx, window.chartConfigs.dirChart);
 '@
 
-    # CORREÇÃO: Função para inicializar eventos após o carregamento da página
+    # Inicialização da página
     $windowLoadInit = @'
-            // CORREÇÃO: Verificar e corrigir inconsistências no carregamento inicial
+            // Verificar inconsistências no carregamento
             window.addEventListener('load', function() {
                 console.log("Página carregada completamente");
                 setTimeout(function() {
                     restoreCheckboxState();
                     updateProgressDisplay();
                     
-                    // CORREÇÃO: Configurar manipuladores de eventos para paginação
+                    // Configurar eventos de paginação
                     setupPaginationHandlers();
                     
-                    // Iniciar verificação periódica
+                    // Verificação periódica
                     setInterval(verifyProgressState, 5000);
                 }, 1500);
             });
             
-            // CORREÇÃO: Adicionar evento para quando o DOM estiver pronto
+            // Inicialização quando o DOM estiver pronto
             $(document).ready(function() {
                 console.log("DOM pronto");
                 setTimeout(setupPaginationHandlers, 1000);
                 
-                // Configurar delegação de eventos global para paginação
+                // Delegação global para eventos de paginação
                 $(document).off('click', '.paginate_button, .paginate_button.previous, .paginate_button.next').on('click', '.paginate_button, .paginate_button.previous, .paginate_button.next', function(e) {
                     console.log("Clique em botão de paginação via delegação global");
                     setTimeout(function() {
@@ -1413,15 +1402,14 @@ function Export-HTMLReport {
                 });
             });
 '@
-
-    # CORREÇÃO: Código de manipulador para botões "Copiar"
+# Funções para manipulação de cópia
     $copyButtonHandler = @'
         // Função para copiar texto para a área de transferência
         function copyToClipboard(elementId) {
             const element = document.getElementById(elementId);
             const text = element.innerText || element.textContent;
             
-            // CORREÇÃO: Usar método moderno com Promise
+            // Método moderno com API Clipboard
             if (navigator.clipboard && window.isSecureContext) {
                 // Para contextos seguros (HTTPS)
                 navigator.clipboard.writeText(text)
@@ -1438,12 +1426,12 @@ function Export-HTMLReport {
             }
         }
         
-        // Fallback para navegadores mais antigos
+        // Método alternativo para navegadores antigos
         function fallbackCopyTextToClipboard(text) {
             const textArea = document.createElement("textarea");
             textArea.value = text;
             
-            // Tornar invisível mas manter na tela
+            // Posicionamento fora da tela visível
             textArea.style.position = "fixed";
             textArea.style.left = "-999999px";
             textArea.style.top = "-999999px";
@@ -1462,28 +1450,28 @@ function Export-HTMLReport {
             document.body.removeChild(textArea);
         }
         
-        // Mostrar notificação de cópia
+        // Exibir notificação após cópia
         function showCopyNotification() {
             const notification = document.getElementById('copyNotification');
             notification.classList.add('show');
             
-            // Esconder notificação após 2 segundos
+            // Ocultar após 2 segundos
             setTimeout(() => {
                 notification.classList.remove('show');
             }, 2000);
         }
 '@
 
-    # CORREÇÃO: Código para lidar com mudanças de página na tabela
+    # Código para mudanças de página na tabela
     $tablePageChangeHandler = @'
-        // Adicionar evento para mudanças de página
+        // Evento para mudanças de página
         function handleTablePageChange() {
             console.log("Manipulador de mudança de página chamado");
             restoreCheckboxState();
             updateProgressDisplay();
         }
         
-        // CORREÇÃO: Função para toggle em linhas
+        // Função para marcação de tarefas concluídas
         function toggleRowDone(checkbox, rowId) {
             console.log(`Toggle row: ${rowId}, checked: ${checkbox.checked}`);
             const row = document.getElementById(rowId);
@@ -1494,17 +1482,17 @@ function Export-HTMLReport {
                 row.classList.remove('file-done');
             }
             
-            // Salvar estado no localStorage
+            // Salvar no localStorage
             saveCheckboxState();
             
-            // Atualizar o gráfico de progresso
+            // Atualizar progresso
             updateProgressDisplay();
         }
 '@
 
-    # CORREÇÃO: Adicionar estilos CSS para resolver o problema da tabela
+    # Estilos CSS adicionais
     $additionalStyles = @'
-    /* CORREÇÃO: Melhorar estabilidade da tabela */
+    /* Melhorar estabilidade da tabela */
     .dataTables_wrapper {
         overflow-x: auto;
         width: 100%;
@@ -1522,29 +1510,29 @@ function Export-HTMLReport {
         text-overflow: ellipsis;
     }
 
-    /* CORREÇÃO: Ajustar coluna de caminho completo para permitir quebra de linha quando necessário */
+    /* Permitir quebra de texto na coluna de caminho */
     table.dataTable td:nth-child(4) {
         white-space: normal;
         word-break: break-all;
     }
 
-    /* CORREÇÃO: Ajustar coluna de tamanho para alinhar à direita */
+    /* Alinhamento à direita para coluna de tamanho */
     table.dataTable td:last-child {
         text-align: right;
         width: 120px !important;
     }
 
-    /* CORREÇÃO: Garantir que o conteúdo da tabela não quebre o layout */
+    /* Garantir que o conteúdo não quebre o layout */
     .overflow-x-auto {
         min-width: 100%;
     }
 
-    /* CORREÇÃO: Ajustar estilo de paginação para melhor usabilidade */
+    /* Melhorar usabilidade da paginação */
     .dataTables_length select {
         min-width: 60px;
     }
     
-    /* NOVA ADIÇÃO: Estilo para legenda de categorias de tamanho */
+    /* Legenda de categorias de tamanho */
     .size-categories-legend {
         display: flex;
         flex-wrap: wrap;
@@ -1571,7 +1559,7 @@ function Export-HTMLReport {
         color: #d1d5db;
     }
     
-    /* CORREÇÃO: Melhorar estilo dos botões de paginação */
+    /* Estilização dos botões de paginação */
     .dataTables_paginate .paginate_button {
         position: relative;
         display: inline-block;
@@ -1610,7 +1598,7 @@ function Export-HTMLReport {
         cursor: not-allowed !important;
     }
     
-    /* CORREÇÃO: Aumentar tamanho dos controles para dispositivos touch */
+    /* Otimização para dispositivos móveis */
     @media (max-width: 768px) {
         .dataTables_paginate .paginate_button {
             min-width: 40px !important;
@@ -1661,7 +1649,7 @@ function Export-HTMLReport {
             padding: 1.5rem;
         }
         .bg-gray-900 {
-            background-color: #0f172a; /* Um pouco mais escuro para aumentar o contraste */
+            background-color: #0f172a;
         }
         .rounded-lg {
             border-radius: 0.5rem;
@@ -1682,10 +1670,10 @@ function Export-HTMLReport {
             font-weight: 700;
         }
         .text-blue-300 {
-            color: #60a5fa; /* Mais brilhante que o original #93c5fd */
+            color: #60a5fa;
         }
         .bg-blue-900 {
-            background-color: #1e40af; /* Mais vibrante que o original #1e3a8a */
+            background-color: #1e40af;
         }
         .text-blue-100 {
             color: #dbeafe;
@@ -1705,7 +1693,7 @@ function Export-HTMLReport {
             font-weight: 600;
         }
         .bg-gray-800 {
-            background-color: #1a2234; /* Um pouco mais claro que o original #1f2937 */
+            background-color: #1a2234;
         }
         .p-4 {
             padding: 1rem;
@@ -1795,7 +1783,7 @@ function Export-HTMLReport {
             height: 16rem;
         }
         
-        /* DataTables overwrites - CORRIGIDO */
+        /* DataTables overwrites */
         .dataTables_wrapper {
             color: #f3f4f6;
             padding: 0;
@@ -1813,7 +1801,7 @@ function Export-HTMLReport {
             padding: 4px 8px;
         }
         
-        /* CORREÇÃO: Melhorar visibilidade dos controles de paginação */
+        /* Melhor visibilidade para controles de paginação */
         .dataTables_info, .dataTables_paginate {
             padding: 12px 0;
             color: #d1d5db;
@@ -1826,31 +1814,31 @@ function Export-HTMLReport {
             align-items: center;
         }
         .dataTables_paginate .paginate_button {
-            color: #ffffff !important; /* Branco puro para maior contraste */
+            color: #ffffff !important;
             border: 1px solid #4b5563 !important;
             border-radius: 4px;
             background: #1f2937 !important;
-            margin: 0 4px; /* Mais espaçamento entre botões */
-            padding: 6px 12px !important; /* Botões maiores */
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important; /* Sombra para melhorar a legibilidade */
+            margin: 0 4px;
+            padding: 6px 12px !important;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
             font-weight: 500 !important;
-            min-width: 32px !important; /* Largura mínima para botões */
+            min-width: 32px !important;
             text-align: center !important;
             cursor: pointer !important;
         }
         .dataTables_paginate .paginate_button.current {
             color: #ffffff !important;
-            background: linear-gradient(to bottom, #3b82f6, #1e40af) !important; /* Gradiente azul */
+            background: linear-gradient(to bottom, #3b82f6, #1e40af) !important;
             border: 1px solid #60a5fa !important;
-            box-shadow: 0 0 10px rgba(59, 130, 246, 0.5) !important; /* Brilho azul */
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.5) !important;
             font-weight: bold !important;
         }
         .dataTables_paginate .paginate_button:hover {
             color: #ffffff !important;
-            background: linear-gradient(to bottom, #60a5fa, #3b82f6) !important; /* Gradiente mais brilhante */
+            background: linear-gradient(to bottom, #60a5fa, #3b82f6) !important;
             border: 1px solid #93c5fd !important;
-            box-shadow: 0 0 15px rgba(96, 165, 250, 0.6) !important; /* Brilho mais intenso */
-            transform: translateY(-1px) !important; /* Leve efeito de elevação */
+            box-shadow: 0 0 15px rgba(96, 165, 250, 0.6) !important;
+            transform: translateY(-1px) !important;
             transition: all 0.2s !important;
         }
         .dataTables_paginate .ellipsis {
@@ -1858,21 +1846,21 @@ function Export-HTMLReport {
             font-weight: bold !important;
             font-size: 18px !important;
             padding: 0 5px !important;
-            text-shadow: 0 0 3px rgba(255, 255, 255, 0.5) !important; /* Sombra para realçar */
+            text-shadow: 0 0 3px rgba(255, 255, 255, 0.5) !important;
         }
         
-        /* CORREÇÃO: Garantir que a paginação seja exibida corretamente */
+        /* Garantir visibilidade da paginação */
         .dataTables_paginate .previous,
         .dataTables_paginate .next {
             display: inline-block !important;
         }
         
-        /* Card shadow */
+        /* Sombra para cards */
         .card-shadow {
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
         }
         
-        /* Alternating table rows */
+        /* Linhas alternadas na tabela */
         tr.row-odd {
             background-color: #2d3748;
         }
@@ -1880,9 +1868,9 @@ function Export-HTMLReport {
             background-color: #1e293b;
         }
         
-        /* Stats badge */
+        /* Badge de estatísticas */
         .stats-badge {
-            background-color: #1e40af; /* Mais vibrante */
+            background-color: #1e40af;
             color: #dbeafe;
             padding: 0.5rem 1rem;
             border-radius: 0.5rem;
@@ -1895,9 +1883,9 @@ function Export-HTMLReport {
             text-shadow: 0 0 5px rgba(239, 68, 68, 0.5);
         }
         
-        /* Path card */
+        /* Card de caminho */
         .path-card {
-            background-color: #1a2234; /* Um pouco mais claro */
+            background-color: #1a2234;
             padding: 0.75rem;
             border-radius: 0.375rem;
             margin-bottom: 0.5rem;
@@ -1905,7 +1893,7 @@ function Export-HTMLReport {
             word-break: break-all;
         }
         
-        /* Summary card */
+        /* Card de resumo */
         .summary-card {
             background-color: #374151;
             padding: 1rem;
@@ -1913,7 +1901,7 @@ function Export-HTMLReport {
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
         }
         .summary-card h3 {
-            color: #60a5fa; /* Mais brilhante */
+            color: #60a5fa;
             font-size: 0.875rem;
             margin-bottom: 0.25rem;
         }
@@ -1926,7 +1914,7 @@ function Export-HTMLReport {
             color: #ef4444 !important;
         }
         
-        /* Section description */
+        /* Descrição de seção */
         .section-description {
             color: #d1d5db;
             font-size: 0.875rem;
@@ -1934,17 +1922,17 @@ function Export-HTMLReport {
             line-height: 1.5;
         }
         
-        /* Grid responsive */
+        /* Grid responsiva */
         @media (min-width: 768px) {
             .grid-cols-2 {
                 grid-template-columns: repeat(2, minmax(0, 1fr));
             }
-            .grid-cols-4 {
-                grid-template-columns: repeat(4, minmax(0, 1fr));
+            .grid-cols-3 {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
             }
         }
 
-        /* Override DataTables dark mode conflict */
+        /* Compatibilidade com DataTables */
         table.dataTable tbody tr {
             background-color: transparent;
         }
@@ -1957,12 +1945,12 @@ function Export-HTMLReport {
             color: #d1d5db;
         }
         
-        /* Copy button */
+        /* Botão de cópia */
         .copy-btn {
             display: flex;
             align-items: center;
             gap: 0.25rem;
-            background-color: #1e40af; /* Mais vibrante */
+            background-color: #1e40af;
             color: #dbeafe;
             padding: 0.25rem 0.5rem;
             border-radius: 0.25rem;
@@ -1978,7 +1966,7 @@ function Export-HTMLReport {
             height: 14px;
         }
         
-        /* Copy notification */
+        /* Notificação de cópia */
         .copy-notification {
             position: fixed;
             top: 20px;
@@ -1998,10 +1986,10 @@ function Export-HTMLReport {
             transform: translateY(0);
         }
         
-        /* Tabela com botões de cópia */
+        /* Botões de cópia na tabela */
         .copy-cell-btn {
             background-color: transparent;
-            color: #60a5fa; /* Mais brilhante */
+            color: #60a5fa;
             border: none;
             cursor: pointer;
             padding: 2px 5px;
@@ -2020,21 +2008,21 @@ function Export-HTMLReport {
             background-color: rgba(59, 130, 246, 0.2);
         }
         
-        /* Estilo para linhas marcadas como concluídas */
+        /* Estilo para arquivos processados */
         tr.file-done {
-            background-color: rgba(16, 185, 129, 0.2) !important; /* Verde com transparência */
+            background-color: rgba(16, 185, 129, 0.2) !important;
         }
         tr.file-done td {
-            color: #34d399 !important; /* Texto verde mais claro */
+            color: #34d399 !important;
         }
         
-        /* Estilo para o checkbox */
+        /* Estilo para checkbox */
         .file-check {
             accent-color: #10b981;
             transform: scale(1.2);
         }
         
-        /* Estilo para créditos */
+        /* Créditos do desenvolvedor */
         .developer-credit {
             margin-top: 0.5rem;
             font-weight: 500;
@@ -2042,7 +2030,7 @@ function Export-HTMLReport {
             letter-spacing: 0.5px;
         }
         
-        /* NOVO ESTILO - Barra de Progresso Avançada */
+        /* Barra de Progresso */
         .progress-container {
             position: relative;
             height: 180px;
@@ -2135,7 +2123,7 @@ function Export-HTMLReport {
             text-align: center;
         }
         
-        /* Progress animation */
+        /* Animação da barra de progresso */
         @keyframes pulse {
             0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
             70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
@@ -2146,7 +2134,7 @@ function Export-HTMLReport {
             animation: pulse 2s infinite;
         }
         
-        /* Progress stats icons */
+        /* Ícones de estatísticas */
         .progress-stat-icon {
             font-size: 1.5rem;
             margin-bottom: 5px;
@@ -2221,7 +2209,7 @@ function Export-HTMLReport {
                 <p class="section-description">
                     Resumo quantitativo da análise de arquivos. "Arquivos Ausentes" representa o número de arquivos encontrados na Pasta 1 mas que não existem na Pasta 2.
                 </p>
-                <div class="grid grid-cols-2 grid-cols-4 gap-4">
+                <div class="grid grid-cols-3 gap-4">
                     <div class="summary-card">
                         <h3>Total Analisado</h3>
                         <p id="totalAnalyzed">$formattedTotalAnalyzed</p>
@@ -2235,11 +2223,6 @@ function Export-HTMLReport {
                     <div class="summary-card">
                         <h3>Tamanho Total</h3>
                         <p id="totalSize">$formattedTotalSize</p>
-                    </div>
-                    
-                    <div class="summary-card">
-                        <h3>Duração Total da Análise</h3>
-                        <p id="processingTime">$formattedTime</p>
                     </div>
                 </div>
             </div>
@@ -2308,7 +2291,7 @@ function Export-HTMLReport {
                         Acompanhe o progresso da sincronização dos arquivos. Use os checkboxes na tabela abaixo para marcar os arquivos que já foram processados.
                     </p>
                     
-                    <!-- NOVO MODELO DE PROGRESSO -->
+                    <!-- Barra de Progresso -->
                     <div class="progress-container">
                         <div class="progress-percentage-display" id="progressPercentage">0%</div>
                         
@@ -2368,28 +2351,30 @@ function Export-HTMLReport {
     <div id="copyNotification" class="copy-notification">Copiado para a área de transferência!</div>
     
     <script>
-        // CORREÇÃO: Melhorar manipulador de eventos para funcionar em todos os navegadores
+        // Funções para manipulação de cópia
         $copyButtonHandler
         
-        // CORREÇÃO: Função para alternar estado de linha e salvar estado
+        // Funções para manipulação de linhas da tabela
         $tablePageChangeHandler
         
+        // Funções para persistência de estado
         $saveCheckboxState
         
         $restoreCheckboxState
         
+        // Funções para rastreamento de progresso
         $updateProgressCode
         
         $verifyProgressState
         
-        // CORREÇÃO: Adicionar manipulador de eventos para paginação
+        // Configuração de eventos de paginação
         $paginationHandler
         
-        // Inicialização dos gráficos com dados dinâmicos
+        // Inicialização dos gráficos
         document.addEventListener('DOMContentLoaded', function() {
             $chartInitCode
             
-            // Dados diretamente no JavaScript
+            // Dados para os gráficos
             const extensionData = $extensionChartJson;
             const sizeData = $sizeRangesChartJson;
             const dirData = $dirChartJson;
@@ -2398,13 +2383,13 @@ function Export-HTMLReport {
             console.log('Dados de tamanhos:', sizeData);
             console.log('Dados de diretórios:', dirData);
             
-            // Cores para os outros gráficos - MAIS VIBRANTES
+            // Cores para os gráficos
             const colors = [
                 '#3b82f6', '#10b981', '#8b5cf6', '#ef4444', '#f59e0b',
                 '#06b6d4', '#6366f1', '#14b8a6', '#ec4899', '#f97316'
             ];
             
-            // Opções comuns para os gráficos
+            // Opções comuns para gráficos
             const commonOptions = {
                 responsive: true,
                 maintainAspectRatio: false,
@@ -2437,18 +2422,21 @@ function Export-HTMLReport {
                 }
             };
             
+            // Renderizar gráficos
             $saveSizeChartData
             
+            // Inicializar tabela de dados
             $dataTablesInitCode
         });
         
+        // Eventos de carregamento da página
         $windowLoadInit
     </script>
 </body>
 </html>
 "@
     
-    # Salvar HTML - Sem exibir mensagem no console
+    # Salvar HTML
     try {
         # Garantir pasta de destino
         $outputDir = Split-Path -Path $OutputHTMLFile -Parent
@@ -2464,7 +2452,7 @@ function Export-HTMLReport {
             Start-Process $OutputHTMLFile
         }
         catch {
-            # Silenciosamente ignorar erros ao abrir o navegador
+            # Ignorar erros ao abrir o navegador
         }
     }
     catch {
@@ -2520,34 +2508,34 @@ function Compare-Folders {
         [switch]$HandleLongPaths = $false,
         [switch]$UseParallel = $true,
         [int]$MaxThreads = 0,
-        [switch]$ShowDebug = $false  # Novo parâmetro para controlar mensagens de debug
+        [switch]$ShowDebug = $false
     )
     
-    # Detectar PowerShell ISE
+    # Detectar ambiente PowerShell
     $isISE = $null -ne $psISE
     
-    # Se estiver no ISE, usar modo otimizado para ISE
+    # Ajustar configurações para o ambiente
     if ($isISE) {
         $UseParallel = $false
     }
-    # Se não, verificar versão do PowerShell para compatibilidade com paralelo
+    # Verificar versão do PowerShell para compatibilidade paralela
     else {
         $psVersion = $PSVersionTable.PSVersion.Major
         $supportsParallel = $psVersion -ge 7
         
-        # Se não suporta paralelo, desativar independente da solicitação
+        # Desativar paralelo se a versão não suportar
         if (-not $supportsParallel -and $UseParallel) {
             $UseParallel = $false
             Write-Host "Processamento paralelo requer PowerShell 7+. Usando modo sequencial." -ForegroundColor Yellow
         }
     }
     
-    # Se MaxThreads não for especificado, usar o padrão
+    # Configurar número de threads
     if ($MaxThreads -le 0) {
         $MaxThreads = $global:defaultMaxThreads
     }
     
-    # CORREÇÃO: Registrar tempo de início e garantir que ele seja capturado corretamente
+    # Registrar tempo de início
     $startTime = [DateTime]::Now
     $global:scriptStartTime = $startTime
     
@@ -2557,7 +2545,7 @@ function Compare-Folders {
         $Folder2Path = Enable-LongPaths -Path $Folder2Path
     }
     
-    # Verificar pastas
+    # Verificar acessibilidade das pastas
     Write-Host "`n[VERIFICANDO PASTAS]" -ForegroundColor Yellow
     $folder1Accessible = Test-Path $Folder1Path
     $folder2Accessible = Test-Path $Folder2Path
@@ -2587,11 +2575,8 @@ function Compare-Folders {
     $scanFolder1Start = [DateTime]::Now
     
     try {
-        # Detectar PowerShell ISE
-        $isISE = $null -ne $psISE
-        
         if ($isISE) {
-            # Usar abordagem específica para o ISE
+            # Processamento para PowerShell ISE
             $global:folder1Files = Scan-DirectoriesISE -BasePath $Folder1Path -Stage "Escaneando" -FolderLabel "Pasta 1"
         }
         elseif ($UseParallel) {
@@ -2623,7 +2608,7 @@ function Compare-Folders {
     
     try {
         if ($isISE) {
-            # Usar abordagem específica para o ISE
+            # Processamento para PowerShell ISE
             $global:folder2Files = Scan-DirectoriesISE -BasePath $Folder2Path -Stage "Escaneando" -FolderLabel "Pasta 2"
         }
         elseif ($UseParallel) {
@@ -2656,7 +2641,7 @@ function Compare-Folders {
     $processedFolder1 = 0
     $compareStart = [DateTime]::Now
     
-    # Criar um HashSet para pesquisa rápida
+    # Criar HashSet para pesquisa rápida
     $folder2FilePathsHash = [System.Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
     foreach ($file in $global:folder2Files) {
         $relativePath = $file.FullName.Substring($Folder2Path.Length).TrimStart('\')
@@ -2666,7 +2651,7 @@ function Compare-Folders {
     foreach ($folder1File in $global:folder1Files) {
         $processedFolder1++
         
-        # Exibir a cada 1000 arquivos processados para reduzir sobrecarga de tela
+        # Atualizar progresso periodicamente
         if ($processedFolder1 % 1000 -eq 0 -or $processedFolder1 -eq 1 -or $processedFolder1 -eq $totalFolder1) {
             $status = "Arquivos únicos: $($global:uniqueFiles.Count) encontrados até agora"
             Show-AdvancedProgress -Stage "Análise" -Current $processedFolder1 -Total $totalFolder1 -StartTime $compareStart -Status $status
@@ -2675,7 +2660,7 @@ function Compare-Folders {
         $relativePath = $folder1File.FullName.Substring($Folder1Path.Length).TrimStart('\')
         
         if (-not $folder2FilePathsHash.Contains($relativePath)) {
-            # CORREÇÃO: Formatar tamanho com unidade apropriada e garantir precisão do tamanho
+            # Formatar tamanho com unidade apropriada
             $tamanho = $folder1File.Length
             $tamanhoFormatado = if ($tamanho -ge 1GB) {
                 "{0:N2} GB" -f ($tamanho / 1GB)
@@ -2695,22 +2680,22 @@ function Compare-Folders {
         }
     }
     
-    # Garantir atualização final
+    # Atualização final
     Show-AdvancedProgress -Stage "Análise" -Current $totalFolder1 -Total $totalFolder1 -StartTime $compareStart
     
-    # Gerar relatório HTML se solicitado
+    # Gerar relatório HTML
     if ($global:uniqueFiles.Count -gt 0) {
         if (-not [string]::IsNullOrWhiteSpace($HTMLReport)) {
-            # Calcular tempo de execução mas não exibir a menos que ShowDebug seja verdadeiro
+            # Calcular tempo de execução
             $currentTime = [DateTime]::Now
             $totalExecutionTime = $currentTime - $startTime
             
-            # Exibir mensagem de debug somente se solicitado
+            # Debug opcional
             if ($ShowDebug) {
                 Write-Host "`n[DEBUG] Tempo de execução antes de gerar relatório: $totalExecutionTime" -ForegroundColor Magenta
             }
             
-            # Passar o parâmetro ShowDebug para Export-HTMLReport
+            # Exportar relatório
             Export-HTMLReport -UniqueFiles $global:uniqueFiles -Folder1Path $Folder1Path -Folder2Path $Folder2Path `
                              -OutputHTMLFile $HTMLReport -Folder1Count $global:folder1Files.Count `
                              -Folder2Count $global:folder2Files.Count -StartTime $startTime
@@ -2724,17 +2709,17 @@ function Compare-Folders {
         Write-Host "Nenhum arquivo exclusivo encontrado na Pasta 1." -ForegroundColor White
     }
     
-    # Exibir fim
+    # Exibir tempo total
     Write-Host "`n[OPERAÇÃO CONCLUÍDA]" -ForegroundColor Cyan
     Write-Host "Tempo total de execução: " -NoNewline -ForegroundColor DarkGray
     $totalTime = [DateTime]::Now - $startTime
     
-    # Formatar o tempo final no mesmo formato usado no relatório HTML
+    # Formatar tempo
     $hours = [Math]::Floor($totalTime.TotalHours)
     $minutes = $totalTime.Minutes
     $seconds = $totalTime.Seconds
     
-    # Arredondar para cima caso seja menor que 1 segundo
+    # Mínimo de 1 segundo
     if (($totalTime.TotalSeconds -gt 0) -and ($seconds -eq 0)) {
         $seconds = 1
     }
@@ -2743,17 +2728,17 @@ function Compare-Folders {
     Write-Host $formattedTime -ForegroundColor Yellow
 }
 
-# Configurações de exemplo (podem ser alteradas conforme necessário)
-$outputDir = "C:\temp\COMPARAÇÕES"  # Pasta onde serão salvos os relatórios
+# Configurações padrão
+$outputDir = "C:\temp\COMPARAÇÕES"  # Pasta para relatórios
 
-# Definir os pares de pastas para comparação
+# Configuração dos pares de pastas para comparação
 $folderPairs = @(
-    # Par 1: Mkt Edição vs Mkt Edição
+    # Exemplo: comparar OneDrive com Desktop
     @{
         Folder1 = "C:\Users\mathews"
         Folder2 = "C:\Users\mathews"
     }
 )
 
-# Executar a comparação com geração automática de nomes
+# Execução
 Compare-FolderPairs -FolderPairs $folderPairs -OutputDir $outputDir
