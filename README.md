@@ -32,9 +32,9 @@ A ferramenta gera um relatório HTML interativo que facilita a visualização e 
   <em>O demo mostra todas as funcionalidades do relatório, incluindo gráficos, estatísticas e tabela interativa</em>
 </p>
 
-![image](https://github.com/user-attachments/assets/aaff75a0-b60d-4525-88ed-1e21955b0ca8)
+![image](https://github.com/user-attachments/assets/58aafa3e-3099-49d3-982e-aab2c724064c)
 
-![image](https://github.com/user-attachments/assets/fb708e18-e50e-41c5-9aa9-c3f4e175f138)
+![image](https://github.com/user-attachments/assets/ef80e446-0ddd-4941-a39a-55c75cf73c18)
 
 ![image](https://github.com/user-attachments/assets/5693de2b-9605-43e0-87a8-793e80a589e0)
 
