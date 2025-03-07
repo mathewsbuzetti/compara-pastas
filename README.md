@@ -18,7 +18,7 @@
 | **Tags** | `powershell`, `file-comparison`, `directory-sync`, `reporting` |
 | **Status** | ✅ Aprovado para ambiente de produção |
 
-## 📊 Visualização do Relatório Interativo
+## 📷 Visualização do Relatório Interativo
 
 A ferramenta gera um relatório HTML interativo que facilita a visualização e gerenciamento das diferenças entre as pastas comparadas. O relatório inclui gráficos, estatísticas e uma tabela de arquivos com recursos de filtragem e marcação de progresso.
 
