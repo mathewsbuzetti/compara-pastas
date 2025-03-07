@@ -217,7 +217,6 @@ O relatório HTML gerado inclui:
    - Total de arquivos analisados
    - Arquivos ausentes na pasta de destino
    - Tamanho total dos arquivos ausentes
-   - Tempo total da análise
 
 3. **Visualizações Gráficas**
    - Distribuição por tamanho de arquivo
