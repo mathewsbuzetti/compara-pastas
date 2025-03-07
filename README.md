@@ -11,7 +11,7 @@
 
 | Metadado | Descrição |
 |----------|-----------|
-| **Título** | Comparador de Pastas - Versão Aprimorada |
+| **Título** | Comparador de Pastas e Conteúdo - Versão Aprimorada |
 | **Versão** | 1.0.0 |
 | **Data** | 07/03/2025 |
 | **Autor** | Mathews Buzetti |
