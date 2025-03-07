@@ -127,7 +127,7 @@ Compare-FolderPairs -FolderPairs $folderPairs -OutputDir $outputDir
    ```
 3. Execute o script:
    ```powershell
-   .\Script/Compare-FolderStructures.ps1
+   .\Compare-FolderStructures.ps1
    ```
 
 **Método 2: Clique com botão direito**
