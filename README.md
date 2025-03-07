@@ -1,4 +1,4 @@
-# 🔄 Comparador de Pastas - PowerShell
+# 🔄 Comparador de Pastas e Conteúdo - PowerShell
 
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-Mathews_Buzetti-blue)](https://www.linkedin.com/in/mathewsbuzetti)
 ![PowerShell](https://img.shields.io/badge/PowerShell-5391FE?style=flat-square&logo=powershell&logoColor=white)
