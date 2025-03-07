@@ -13,7 +13,7 @@
 |----------|-----------|
 | **Título** | Comparador de Pastas - Versão Aprimorada |
 | **Versão** | 1.0.0 |
-| **Data** | 05/03/2025 |
+| **Data** | 07/03/2025 |
 | **Autor** | Mathews Buzetti |
 | **Tags** | `powershell`, `file-comparison`, `directory-sync`, `reporting` |
 | **Status** | ✅ Aprovado para ambiente de produção |
@@ -238,4 +238,4 @@ O relatório HTML gerado inclui:
 ## 🔄 Versionamento
 
 - Versão: 1.0.0
-- Última atualização: 05/03/2025
+- Última atualização: 07/03/2025
